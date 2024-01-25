@@ -1,0 +1,106 @@
+(undo-tree-save-format-version . 1)
+"abf362846fe2e716dd6715ab96f599eee98d7714"
+[nil nil nil nil (26032 32395 403312 0) 0 nil]
+([nil nil ((#(";;turn off for minibuffer
+(with-eval-after-load 'evil-maps
+  (setcdr evil-insert-state-map nil)
+  (define-key evil-insert-state-map [escape] 'evil-normal-state))
+
+(defun my-minibuffer-setup-hook ()
+  (set (make-local-variable 'evil-insert-state-cursor) (list nil))
+  (evil-emacs-state))
+
+(add-hook 'minibuffer-setup-hook 'my-minibuffer-setup-hook)
+;; turn off for dired mode
+(evil-set-initial-state 'dired-mode 'emacs)
+
+(evil-set-initial-state 'Buffer-menu-mode 'emacs)
+" 0 2 (face font-lock-comment-delimiter-face fontified t) 2 26 (face font-lock-comment-face fontified t) 26 27 (fontified t) 27 47 (face font-lock-keyword-face fontified t) 47 164 (fontified t) 164 169 (face font-lock-keyword-face fontified t) 169 170 (fontified t) 170 194 (face font-lock-function-name-face fontified t) 194 348 (fontified t) 348 351 (face font-lock-comment-delimiter-face fontified t) 351 375 (face font-lock-comment-face fontified t) 375 470 (fontified t)) . 231) (undo-tree-id100 . -470) (undo-tree-id101 . -469) (t 26032 32181 422508 256000)) nil (26032 32395 707570 0) 0 nil])
+([nil nil ((1154 . 1157)) nil (26032 32544 395577 0) 0 nil] [nil nil ((1156 . 1162) (#("      " 0 6 (fontified nil)) . 1155) (undo-tree-id68 . -6) (undo-tree-id69 . -6) (undo-tree-id70 . -6) (undo-tree-id71 . -6) (undo-tree-id72 . -6) (undo-tree-id73 . -6) (undo-tree-id74 . -6) (undo-tree-id75 . -6) (undo-tree-id76 . -6) (undo-tree-id77 . -6) (undo-tree-id78 . -6) (undo-tree-id79 . -6) (undo-tree-id80 . -6) (undo-tree-id81 . -6) (undo-tree-id82 . -6) (undo-tree-id83 . -6) (1155 . 1162) (#("      " 0 6 (fontified nil)) . 1154) (undo-tree-id84 . -6) (undo-tree-id85 . -6) (undo-tree-id86 . -6) (undo-tree-id87 . -6) (undo-tree-id88 . -6) (undo-tree-id89 . -6) (undo-tree-id90 . -6) (undo-tree-id91 . -6) (undo-tree-id92 . -6) (undo-tree-id93 . -6) (undo-tree-id94 . -6) (undo-tree-id95 . -6) (undo-tree-id96 . -6) (undo-tree-id97 . -6) (undo-tree-id98 . -6) (undo-tree-id99 . -6) (1153 . 1161)) ((#("
+      
+" 0 1 (fontified t) 1 7 (fontified nil) 7 8 (fontified nil)) . 1153) (undo-tree-id102 . -7) (undo-tree-id103 . -7) (undo-tree-id104 . -7) (undo-tree-id105 . -7) (undo-tree-id106 . -7) (undo-tree-id107 . -7) (undo-tree-id108 . -7) (undo-tree-id109 . -7) (undo-tree-id110 . -7) (undo-tree-id111 . -7) (undo-tree-id112 . -7) (undo-tree-id113 . -7) (undo-tree-id114 . -7) (undo-tree-id115 . -7) (undo-tree-id116 . -8) (undo-tree-id117 . -8) (undo-tree-id118 . -8) (undo-tree-id119 . -8) (undo-tree-id120 . -8) (undo-tree-id121 . -8) (undo-tree-id122 . -8) (undo-tree-id123 . -8) (undo-tree-id124 . -8) (undo-tree-id125 . -8) (undo-tree-id126 . -8) (undo-tree-id127 . -8) (undo-tree-id128 . -8) (undo-tree-id129 . -8) (undo-tree-id130 . -8) (undo-tree-id131 . -8) (undo-tree-id132 . -8) (undo-tree-id133 . -8) (undo-tree-id134 . -8) (undo-tree-id135 . -8) (undo-tree-id136 . -8) (undo-tree-id137 . -8) (undo-tree-id138 . -8) (undo-tree-id139 . -8) (undo-tree-id140 . -8) (undo-tree-id141 . -8) (undo-tree-id142 . -8) (undo-tree-id143 . -8) (undo-tree-id144 . -8) (undo-tree-id145 . -8) (undo-tree-id146 . -8) (undo-tree-id147 . -8) (undo-tree-id148 . -8) (undo-tree-id149 . -8) (undo-tree-id150 . -8) (undo-tree-id151 . -8) (undo-tree-id152 . -8) (undo-tree-id153 . -8) (undo-tree-id154 . -8) (undo-tree-id155 . -8) (undo-tree-id156 . -8) (undo-tree-id157 . -8) (undo-tree-id158 . -8) (undo-tree-id159 . -8) (undo-tree-id160 . -8) (undo-tree-id161 . -8) (undo-tree-id162 . -8) (undo-tree-id163 . -8) (undo-tree-id164 . -8) (undo-tree-id165 . -8) (undo-tree-id166 . -8) (undo-tree-id167 . -8) (undo-tree-id168 . -8) (undo-tree-id169 . -8) (undo-tree-id170 . -8) (undo-tree-id171 . -8) (undo-tree-id172 . -8) (undo-tree-id173 . -8) (undo-tree-id174 . -8) (undo-tree-id175 . -8) (undo-tree-id176 . -8) (undo-tree-id177 . -8) (undo-tree-id178 . -8) (undo-tree-id179 . -8) (undo-tree-id180 . -8) (undo-tree-id181 . -8) (undo-tree-id182 . -8) (undo-tree-id183 . -8) (undo-tree-id184 . -8) (undo-tree-id185 . -8) (1154 . 1160) (#("      
+" 0 6 (fontified nil) 6 7 (fontified nil)) . 1155) (undo-tree-id186 . -6) (undo-tree-id187 . -6) (undo-tree-id188 . -6) (undo-tree-id189 . -6) (undo-tree-id190 . -6) (undo-tree-id191 . -6) (undo-tree-id192 . -6) (undo-tree-id193 . -6) (undo-tree-id194 . -6) (undo-tree-id195 . -6) (undo-tree-id196 . -6) (undo-tree-id197 . -6) (undo-tree-id198 . -6) (undo-tree-id199 . -6) (undo-tree-id200 . -7) (undo-tree-id201 . -7) (undo-tree-id202 . -7) (undo-tree-id203 . -7) (undo-tree-id204 . -7) (undo-tree-id205 . -7) (undo-tree-id206 . -7) (undo-tree-id207 . -7) (undo-tree-id208 . -7) (undo-tree-id209 . -7) (undo-tree-id210 . -7) (undo-tree-id211 . -7) (undo-tree-id212 . -7) (undo-tree-id213 . -7) (undo-tree-id214 . -7) (undo-tree-id215 . -7) (undo-tree-id216 . -7) (undo-tree-id217 . -7) (undo-tree-id218 . -7) (undo-tree-id219 . -7) (undo-tree-id220 . -7) (undo-tree-id221 . -7) (undo-tree-id222 . -7) (undo-tree-id223 . -7) (undo-tree-id224 . -7) (undo-tree-id225 . -7) (undo-tree-id226 . -7) (undo-tree-id227 . -7) (undo-tree-id228 . -7) (undo-tree-id229 . -7) (undo-tree-id230 . -7) (undo-tree-id231 . -7) (undo-tree-id232 . -7) (undo-tree-id233 . -7) (undo-tree-id234 . -7) (undo-tree-id235 . -7) (undo-tree-id236 . -7) (undo-tree-id237 . -7) (undo-tree-id238 . -7) (undo-tree-id239 . -7) (undo-tree-id240 . -7) (undo-tree-id241 . -7) (undo-tree-id242 . -7) (undo-tree-id243 . -7) (undo-tree-id244 . -7) (undo-tree-id245 . -7) (undo-tree-id246 . -7) (undo-tree-id247 . -7) (undo-tree-id248 . -7) (undo-tree-id249 . -7) (undo-tree-id250 . -7) (undo-tree-id251 . -7) (undo-tree-id252 . -7) (undo-tree-id253 . -7) (undo-tree-id254 . -7) (undo-tree-id255 . -7) (1155 . 1161) (#("      " 0 4 (fontified t) 4 5 (fontified t) 5 6 (fontified t)) . 1156) (undo-tree-id256 . -6) (undo-tree-id257 . -6) (undo-tree-id258 . -6) (undo-tree-id259 . -6) (undo-tree-id260 . -6) (undo-tree-id261 . -6) (undo-tree-id262 . -6) (undo-tree-id263 . -6) (undo-tree-id264 . -6) (undo-tree-id265 . -6) (undo-tree-id266 . -6) (undo-tree-id267 . -6) (undo-tree-id268 . -6) (undo-tree-id269 . -6) (undo-tree-id270 . -6) (undo-tree-id271 . -6) (undo-tree-id272 . -6) (undo-tree-id273 . -6) (undo-tree-id274 . -6) (undo-tree-id275 . -6) (undo-tree-id276 . -6) (undo-tree-id277 . -6) (undo-tree-id278 . -6) (undo-tree-id279 . -6) (undo-tree-id280 . -6) (undo-tree-id281 . -5) (undo-tree-id282 . -5) (undo-tree-id283 . -5) (undo-tree-id284 . -5) (undo-tree-id285 . -5) (undo-tree-id286 . -5) (undo-tree-id287 . -5) (undo-tree-id288 . -5) (undo-tree-id289 . -5) (undo-tree-id290 . -5) (undo-tree-id291 . -5) (undo-tree-id292 . -5) (undo-tree-id293 . -5) (undo-tree-id294 . -5) (undo-tree-id295 . -6) (undo-tree-id296 . -6) (undo-tree-id297 . -6) (undo-tree-id298 . -6) (undo-tree-id299 . -6) (undo-tree-id300 . -6) (undo-tree-id301 . -6) (undo-tree-id302 . -6) (undo-tree-id303 . -6) (undo-tree-id304 . -6) (undo-tree-id305 . -6) (undo-tree-id306 . -6) (undo-tree-id307 . -6) (undo-tree-id308 . -6) (undo-tree-id309 . -6) (undo-tree-id310 . -6)) (26032 32395 403541 0) 0 nil])
+([nil nil ((nil rear-nonsticky nil 1626 . 1627) (nil fontified nil 1532 . 1627) (nil fontified nil 1508 . 1532) (nil fontified nil 1505 . 1508) (nil fontified nil 1351 . 1505) (nil fontified nil 1327 . 1351) (nil fontified nil 1326 . 1327) (nil fontified nil 1321 . 1326) (nil fontified nil 1204 . 1321) (nil fontified nil 1184 . 1204) (nil fontified nil 1183 . 1184) (nil fontified nil 1159 . 1183) (nil fontified nil 1157 . 1159) (1157 . 1627)) nil (26032 32544 395576 0) 0 nil])
+([nil nil ((#(" " 0 1 (fontified t)) . -1160) (undo-tree-id0 . -1) (undo-tree-id1 . -1) (undo-tree-id2 . -1) (undo-tree-id3 . -1) (undo-tree-id4 . -1) (undo-tree-id5 . -1) (undo-tree-id6 . -1) (undo-tree-id7 . -1) (undo-tree-id8 . -1) (undo-tree-id9 . -1) (undo-tree-id10 . -1) (undo-tree-id11 . -1) (undo-tree-id12 . -1) (undo-tree-id13 . -1) (undo-tree-id14 . -1) (undo-tree-id15 . -1) (undo-tree-id16 . -1) (undo-tree-id17 . -1) (undo-tree-id18 . -1) (undo-tree-id19 . -1) (undo-tree-id20 . -1) (undo-tree-id21 . -1) (undo-tree-id22 . -1) (undo-tree-id23 . -1) (undo-tree-id24 . -1) (undo-tree-id25 . -1) (undo-tree-id26 . -1) (undo-tree-id27 . -1) (undo-tree-id28 . -1) (undo-tree-id29 . -1) (undo-tree-id30 . -1) (undo-tree-id31 . -1) (undo-tree-id32 . -1) (undo-tree-id33 . -1) (undo-tree-id34 . -1) (undo-tree-id35 . -1) (undo-tree-id36 . -1) (undo-tree-id37 . -1) (undo-tree-id38 . -1) (undo-tree-id39 . -1) (undo-tree-id40 . -1) (#(" " 0 1 (fontified t)) . -1161) (undo-tree-id41 . -1) (undo-tree-id42 . -1) (undo-tree-id43 . -1) (undo-tree-id44 . -1) (undo-tree-id45 . -1) (undo-tree-id46 . -1) (undo-tree-id47 . -1) (undo-tree-id48 . -1) (undo-tree-id49 . -1) (undo-tree-id50 . -1) (undo-tree-id51 . -1) (undo-tree-id52 . -1) (undo-tree-id53 . -1) (undo-tree-id54 . -1) (undo-tree-id55 . -1) (undo-tree-id56 . -1) (undo-tree-id57 . -1) (undo-tree-id58 . -1) (undo-tree-id59 . -1) (undo-tree-id60 . -1) (undo-tree-id61 . -1) (undo-tree-id62 . -1) (undo-tree-id63 . -1) (undo-tree-id64 . -1) (undo-tree-id65 . -1) (undo-tree-id66 . -1) (undo-tree-id67 . -1) 1162) ((1160 . 1162)) (26032 32395 403263 0) 0 nil])
+([nil nil ((1 . 4)) nil (26032 32544 395571 0) 0 nil])
+nil
+([nil nil ((#("/" 0 1 (fontified t)) . -1) (undo-tree-id320 . -1) (#("d" 0 1 (fontified t)) . -2) (undo-tree-id321 . -1) (#("i" 0 1 (fontified t)) . -3) (undo-tree-id322 . -1) 4) nil (26032 32544 395570 0) 0 nil])
+([nil nil ((#(";; Install and require 'evil
+" 0 3 (face font-lock-comment-delimiter-face fontified t) 3 29 (face font-lock-comment-face fontified t)) . 520) (undo-tree-id317 . -28) (undo-tree-id318 . -27) (undo-tree-id319 . -28) 547) nil (26032 32544 395564 0) 0 nil])
+([nil nil ((#("(unless (package-installed-p 'evil)
+" 0 1 (fontified t) 1 7 (face font-lock-keyword-face fontified t) 7 35 (fontified t) 35 36 (fontified t)) . 520) (undo-tree-id315 . -35) (undo-tree-id316 . -27) 547) nil (26032 32544 395560 0) 0 nil])
+([nil nil ((#("  (package-install 'evil))
+" 0 26 (fontified t) 26 27 (fontified t)) . 520) (undo-tree-id313 . -26) (undo-tree-id314 . -25) 545) nil (26032 32544 395556 0) 0 nil])
+([nil nil ((#("(require 'evil)
+" 0 1 (fontified t) 1 8 (face font-lock-keyword-face fontified t) 8 10 (fontified t) 10 14 (face font-lock-constant-face fontified t) 14 15 (fontified t) 15 16 (fontified t)) . 520) (undo-tree-id311 . -15) (undo-tree-id312 . -14) 534) nil (26032 32544 395552 0) 0 nil])
+([nil nil ((#("
+" 0 1 (fontified t)) . 520)) nil (26032 32544 395536 0) 0 nil])
+([nil nil ((#(";; Download and install Evil if not already
+(unless (package-installed-p 'evil)
+  (package-install 'evil))
+
+(require 'evil)
+(evil-mode 1)
+
+
+
+;; Install and require 'undo-tree
+(unless (package-installed-p 'undo-tree)
+  (package-refresh-contents)
+  (package-install 'undo-tree))
+(require 'undo-tree)
+(global-undo-tree-mode)
+
+;; Set the undo system for Evil
+;; (setq evil-undo-system 'undo-tree)
+(evil-set-undo-system 'undo-tree)
+
+;; Additional Evil configurations
+(setq evil-want-C-i-jump nil)
+(setq evil-want-fine-undo t)
+
+
+(when evil-want-C-i-jump
+  (define-key evil-motion-state-map (kbd \"C-i\") 'evil-jump-forward))
+
+;; Disable Evil in certain modes
+(with-eval-after-load 'evil
+  (evil-set-initial-state 'nov-mode 'emacs)
+  (evil-set-initial-state 'term-mode 'emacs)
+  (evil-set-initial-state 'eshell-mode 'emacs))
+
+
+;; Customization
+(setq org-agenda-custom-commands
+      '((\"M\" \"Monthly view\"
+         agenda \"\"
+         ((org-agenda-span 'month)))))
+
+
+;;turn off for minibuffer
+(with-eval-after-load 'evil-maps
+  (setcdr evil-insert-state-map nil)
+  (define-key evil-insert-state-map [escape] 'evil-normal-state))
+
+(defun my-minibuffer-setup-hook ()
+  (set (make-local-variable 'evil-insert-state-cursor) (list nil))
+  (evil-emacs-state))
+
+(add-hook 'minibuffer-setup-hook 'my-minibuffer-setup-hook)
+;; turn off for dired mode
+(evil-set-initial-state 'dired-mode 'emacs)
+
+(evil-set-initial-state 'Buffer-menu-mode 'emacs)
+
+
+
+" 0 3 (face font-lock-comment-delimiter-face fontified t) 3 44 (face font-lock-comment-face fontified t) 44 45 (fontified t) 45 51 (face font-lock-keyword-face fontified t) 51 109 (fontified t) 109 116 (face font-lock-keyword-face fontified t) 116 118 (fontified t) 118 122 (face font-lock-constant-face fontified t) 122 141 (fontified t) 141 144 (face font-lock-comment-delimiter-face fontified t) 144 175 (face font-lock-comment-face fontified t) 175 176 (fontified t) 176 182 (face font-lock-keyword-face fontified t) 182 278 (fontified t) 278 285 (face font-lock-keyword-face fontified t) 285 287 (fontified t) 287 296 (face font-lock-constant-face fontified t) 296 323 (fontified t) 323 326 (face font-lock-comment-delimiter-face fontified t) 326 355 (face font-lock-comment-face fontified t) 355 358 (face font-lock-comment-delimiter-face fontified t) 358 393 (face font-lock-comment-face fontified t) 393 428 (fontified t) 428 431 (face font-lock-comment-delimiter-face fontified t) 431 462 (face font-lock-comment-face fontified t) 462 463 (fontified t) 463 467 (face font-lock-keyword-face fontified t) 467 493 (fontified t) 493 497 (face font-lock-keyword-face fontified t) 497 524 (fontified t) 524 528 (face font-lock-keyword-face fontified t) 528 589 (fontified t) 589 594 (face font-lock-string-face fontified t) 594 618 (fontified t) 618 621 (face font-lock-comment-delimiter-face fontified t) 621 651 (face font-lock-comment-face fontified t) 651 652 (fontified t) 652 672 (face font-lock-keyword-face fontified t) 672 818 (fontified t) 818 821 (face font-lock-comment-delimiter-face fontified t) 821 835 (face font-lock-comment-face fontified t) 835 836 (fontified t) 836 840 (face font-lock-keyword-face fontified t) 840 877 (fontified t) 877 880 (face font-lock-string-face fontified t) 880 881 (fontified t) 881 895 (face font-lock-string-face fontified t) 895 912 (fontified t) 912 914 (face font-lock-string-face fontified t) 914 956 (fontified t) 956 958 (face font-lock-comment-delimiter-face fontified t) 958 982 (face font-lock-comment-face fontified t) 982 983 (fontified t) 983 1003 (face font-lock-keyword-face fontified t) 1003 1120 (fontified t) 1120 1125 (face font-lock-keyword-face fontified t) 1125 1126 (fontified t) 1126 1150 (face font-lock-function-name-face fontified t) 1150 1304 (fontified t) 1304 1307 (face font-lock-comment-delimiter-face fontified t) 1307 1331 (face font-lock-comment-face fontified t) 1331 1409 (fontified t) 1409 1426 (fontified t) 1426 1429 (fontified nil)) . 92) (undo-tree-id5 . -1428) (t 26032 32544 407868 878000)) nil (26032 32772 533953 0) 0 nil])
+([nil nil ((#(";; " 0 3 (face font-lock-comment-delimiter-face fontified t)) . 1) (undo-tree-id3 . -2) (undo-tree-id4 . -3)) nil (26032 32772 533951 0) 0 nil])
+([nil nil ((#("============================
+" 0 29 (fontified t)) . 1) (undo-tree-id2 . -28)) nil (26032 32772 533948 0) 0 nil])
+([nil nil ((#(";; EVIL MODE CONFIGURATION
+" 0 3 (face font-lock-comment-delimiter-face fontified t) 3 27 (face font-lock-comment-face fontified t)) . 1) (undo-tree-id1 . -26)) nil (26032 32772 533946 0) 0 nil])
+([nil nil ((#(";; ============================
+" 0 3 (face font-lock-comment-delimiter-face fontified t) 3 32 (face font-lock-comment-face fontified t)) . 1) (undo-tree-id0 . -31)) nil (26032 32772 533943 0) 0 nil])
+([nil current ((nil rear-nonsticky nil 1837 . 1838) (nil fontified nil 1 . 1838) (1 . 1838)) nil (26032 32772 533922 0) 0 nil])
+nil
