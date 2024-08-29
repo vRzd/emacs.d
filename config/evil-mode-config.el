@@ -59,3 +59,16 @@
 ;; ADDITIONAL CUSTOMIZATIONS
 ;; ============================
 ;; Add here any additional customizations or configurations
+
+(evil-define-key 'normal org-mode-map
+  (kbd "RET") 'org-open-at-point
+  (kbd "TAB") 'org-cycle)
+
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "C-_") nil)
+  (define-key evil-visual-state-map (kbd "C-_") nil)
+  (define-key evil-insert-state-map (kbd "C-_") nil)
+  (define-key evil-motion-state-map (kbd "C-_") nil))
+
+;; Open your .emacs or init.el file and add the following line
+(define-key isearch-mode-map (kbd "s-v") 'isearch-yank-kill)

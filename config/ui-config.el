@@ -46,3 +46,16 @@
 
 ;; Font configuration
 (set-face-attribute 'default nil :height 137)
+
+;; Install which-key if not already installed
+(unless (package-installed-p 'which-key)
+  (package-refresh-contents)
+  (package-install 'which-key))
+
+;; Load and enable which-key mode
+(require 'which-key)
+(which-key-mode)
+
+;; Optional customizations
+(which-key-setup-side-window-bottom)
+(setq which-key-idle-delay 0.5)

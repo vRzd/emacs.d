@@ -1,4 +1,4 @@
-
+	
 ;; ============================
 ;; PACKAGE INITIALIZATION
 ;; ============================
@@ -7,11 +7,12 @@
 (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
 (package-initialize)
 
-(setq exec-path-from-shell-shell-name "/bin/zsh")
 
 (unless (package-installed-p 'use-package)
-  (package-refresh-content)
+;;  (package-refresh-content)
   (package-install 'use-package))
+
+(setq exec-path-from-shell-shell-name "/bin/zsh")
 
 ;; STRAIGHT.EL
 (defvar bootstrap-version)
@@ -48,23 +49,24 @@
 
 
 ;; Path to your emacs directory
-(add-to-list 'load-path "~/.emacs.d/config/")
+;;(add-to-list 'load-path "~/.emacs.d/config/")
 
 ;; Load configuration files
 (load "ui-config.el")
 (load "evil-mode-config.el")
-(load "python-config.el")
+;;(load "python-config.el")
 (load "org-mode-config.el")
 (load "dired-config.el")
+(load "calendar-config.el")
 
 
 
 ;; ============================
 ;; PACKAGE SPECIFIC CONFIGURATIONS
 ;; ============================
-(use-package nov
-  :ensure t
-  :mode ("\\.epub\\'" . nov-mode))
+;;(use-package nov
+;;  :ensure t
+;;  :mode ("\\.epub\\'" . nov-mode))
 
 (use-package vertico
   :config
@@ -103,6 +105,7 @@
 ;; buffer.  This can always be toggled on/off by calling the
 ;; `dired-hide-details-mode' interactively with M-x or its keybindings
 ;; (the left parenthesis by default).
+(require 'dired)
 (add-hook 'dired-mode-hook #'dired-hide-details-mode)
 
 
@@ -110,3 +113,28 @@
 
 
 ;;(add-hook 'org-mode-hook (lambda () (olivetti-mode 1)))
+
+(put 'erase-buffer 'disabled nil)
+
+(setq auto-save-file-name-transforms
+      `((".*" ,"~/.emacs.d/auto-save-list/" t)))
+
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-capture-templates
+   '(("t " "air travel" entry
+      (id "travel")
+      (file " ~/.emacs.d/templates/research-air-travel.tpl")))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+;;(global-set-key (kbd "C-c l") 'display-line-numbers-mode)
+(global-display-line-numbers-mode -1)
