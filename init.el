@@ -48,7 +48,7 @@
   :custom ((doom-modeline-height 15)))
 
 ;; Path to your emacs directory
-(add-to-list 'load-path "~/.emacs.d/config/")
+(add-to-list 'load-path (expand-file-name "config" user-emacs-directory))
 
 ;; Load configuration files
 (load "ui-config.el")
