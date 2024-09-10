@@ -1,0 +1,13 @@
+!init.el
+
+# macOS system files
+.DS_Store
+
+# Emacs backup files
+*~
+.#*
+auto-save-list/
+
+# Emacs generated undo files
+*.~undo-tree~
+
