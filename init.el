@@ -1,4 +1,3 @@
-	
 ;; ============================
 ;; PACKAGE INITIALIZATION
 ;; ============================
@@ -7,14 +6,22 @@
 (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
 (package-initialize)
 
-
 (unless (package-installed-p 'use-package)
-  (package-refresh-content)
+  (package-refresh-contents)
   (package-install 'use-package))
 
-(setq exec-path-from-shell-shell-name "/bin/zsh")
+;; Platform-specific shell configuration
+(when (eq system-type 'darwin)  ;; macOS
+  (setq exec-path-from-shell-shell-name "/bin/zsh")
+  (use-package exec-path-from-shell
+    :ensure t
+    :config
+    (exec-path-from-shell-initialize)))
 
-;; STRAIGHT.EL
+(when (eq system-type 'windows-nt)  ;; Windows
+  (setq explicit-shell-file-name "powershell.exe"))
+
+;; STRAIGHT.EL setup
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -31,22 +38,14 @@
 (setq straight-use-package-by-default t)
 (straight-use-package 'use-package)
 
-
 (eval-when-compile
   (require 'use-package))
 
-(package-install 'exec-path-from-shell)
-(exec-path-from-shell-initialize)
-
-
+;; Icons and Modeline
 (use-package all-the-icons)
-
-;; nerd-icons-install-fonts
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
   :custom ((doom-modeline-height 15)))
-
-
 
 ;; Path to your emacs directory
 (add-to-list 'load-path "~/.emacs.d/config/")
@@ -54,114 +53,62 @@
 ;; Load configuration files
 (load "ui-config.el")
 (load "evil-mode-config.el")
-;;(load "org-mode-config.el")
 (load "dired-config.el")
 (load "calendar-config.el")
 
-
-
-;; ============================
-;; PACKAGE SPECIFIC CONFIGURATIONS
-;; ============================
-;;(use-package nov
-;;  :ensure t
-;;  :mode ("\\.epub\\'" . nov-mode))
-
+;; Vertico for command completion
 (use-package vertico
   :config
   (vertico-mode))
 
-(use-package term
+;; vterm terminal settings
+(use-package vterm
+  :ensure t
   :config
-  (setq explicit-shell-file-name "zsh")
-  (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *"))
+  (define-key vterm-mode-map (kbd "M-<left>") 'vterm-send-M-b)
+  (define-key vterm-mode-map (kbd "M-<right>") 'vterm-send-M-f)
+  (when (eq system-type 'darwin)
+    (setq explicit-shell-file-name "zsh"))  ;; macOS zsh
+  (when (eq system-type 'windows-nt)
+    (setq explicit-shell-file-name "powershell.exe")))  ;; Windows PowerShell
 
-
-
-;; ============================
-;; MISC CONFIGURATIONS
-;; ============================
+;; Miscellaneous configurations
 (recentf-mode 1)
 (setq history-length 25)
 (setq savehist-mode 1)
 (setq save-place-mode 1)
 (setq ring-bell-function 'ignore)
 
-;; Enable mouse wheel tilt scroll
+;; Enable mouse wheel tilt scroll, and configure it for macOS specifically
 (setq mouse-wheel-tilt-scroll t)
 (setq mouse-wheel-flip-direction (if (eq system-type 'darwin) t nil))
-;; Set mac-mouse-wheel-smooth-scroll only for macOS (Darwin)
 (when (eq system-type 'darwin)
   (setq mac-mouse-wheel-smooth-scroll t))
 
-;; vertio
-;;(vertico-mode 1)
-
-;; marginalia
-(marginalia-mode 1)
-
-;; Automatically hide the detailed listing when visiting a Dired
-;; buffer.  This can always be toggled on/off by calling the
-;; `dired-hide-details-mode' interactively with M-x or its keybindings
-;; (the left parenthesis by default).
+;; Dired configuration
 (require 'dired)
 (add-hook 'dired-mode-hook #'dired-hide-details-mode)
 
-
 (setq use-short-answers t)
 
-
-;;(add-hook 'org-mode-hook (lambda () (olivetti-mode 1)))
-
-(put 'erase-buffer 'disabled nil)
-
+;; Auto-save settings
 (setq auto-save-file-name-transforms
       `((".*" ,"~/.emacs.d/auto-save-list/" t)))
 
-
+;; Custom variables (org-mode example)
 (custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
  '(org-capture-templates
-   '(("t " "air travel" entry
+   '(("t" "air travel" entry
       (id "travel")
-      (file " ~/.emacs.d/templates/research-air-travel.tpl")))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+      (file "~/.emacs.d/templates/research-air-travel.tpl")))))
 
-;;(global-set-key (kbd "C-c l") 'display-line-numbers-mode)
-(global-display-line-numbers-mode -1)
+(custom-set-faces)
 
-;;(use-package vterm
-;;  :ensure t
-;;  :config
-  ;; Map Option + Left Arrow to move one word left
-;;  (define-key vterm-mode-map (kbd "M-<left>") 'backward-word)
-  ;; Map Option + Right Arrow to move one word right
-;;  (define-key vterm-mode-map (kbd "M-<right>") 'forward-word))
-
-(add-hook 'vterm-mode-hook
-          (lambda ()
-            (evil-local-mode -1)))
-
-(use-package vterm
-  :ensure t
-  :config
-  (define-key vterm-mode-map (kbd "M-<left>") 'vterm-send-M-b)
-  (define-key vterm-mode-map (kbd "M-<right>") 'vterm-send-M-f))
-
-
-;; Function to resize window horizontally
+;; Key bindings for resizing windows horizontally
 (defun my-resize-window-horizontally (size)
   "Resize the window horizontally by SIZE."
   (adjust-window-trailing-edge (selected-window) size t))
 
-;; Key bindings for horizontal resizing
-(global-set-key (kbd "C-c C-h C--") (lambda () (interactive) (my-resize-window-horizontally -5)))  ;; Move left
-(global-set-key (kbd "C-c C-h C-=") (lambda () (interactive) (my-resize-window-horizontally 5)))   ;; Move right
+(global-set-key (kbd "C-c C-h C--") (lambda () (interactive) (my-resize-window-horizontally -5)))  ;; Shrink
+(global-set-key (kbd "C-c C-h C-=") (lambda () (interactive) (my-resize-window-horizontally 5)))   ;; Expand
+
