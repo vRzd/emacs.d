@@ -36,18 +36,18 @@
 (setq org-log-into-drawer 'nil)
 
 ;; Remove any custom hooks that might add timestamps
-(remove-hook 'org-after-todo-state-change-hook 'org-add-log-setup)
+;;(remove-hook 'org-after-todo-state-change-hook 'org-add-log-setup)
 
 ;; Function to remove existing timestamp notes in Org files
-(defun remove-org-timestamps ()
-  "Remove all lines with Org timestamps in the current buffer."
-  (interactive)
-  (goto-char (point-min))
-  (while (re-search-forward "- Note taken on \\[.*\\]" nil t)
-    (replace-match "")))
+;;(defun remove-org-timestamps ()
+;;  "Remove all lines with Org timestamps in the current buffer."
+;;  (interactive)
+;;  (goto-char (point-min))
+;;  (while (re-search-forward "- Note taken on \\[.*\\]" nil t)
+;;   (replace-match "")))
 
 ;; Optionally, bind the function to a key for easy access
-(global-set-key (kbd "C-c r") 'remove-org-timestamps)
+;;(global-set-key (kbd "C-c r") 'remove-org-timestamps)
 
 ;; Ensure Org mode is loaded
 (require 'org)
@@ -65,8 +65,10 @@
   "Start Org Capture for air travel template."
   (interactive)
   (org-capture nil "t"))
-
 ;; Bind the function to a key, for example, F7
 (global-set-key (kbd "<f7>") 'start-air-travel-capture)
 
 (global-set-key (kbd "<f6>") 'org-capture)
+
+;; Clock
+(evil-define-key 'insert org-mode-map (kbd "C-c C-x .") 'org-time-stamp)

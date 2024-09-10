@@ -9,7 +9,7 @@
 
 
 (unless (package-installed-p 'use-package)
-;;  (package-refresh-content)
+  (package-refresh-content)
   (package-install 'use-package))
 
 (setq exec-path-from-shell-shell-name "/bin/zsh")
@@ -49,13 +49,12 @@
 
 
 ;; Path to your emacs directory
-;;(add-to-list 'load-path "~/.emacs.d/config/")
+(add-to-list 'load-path "~/.emacs.d/config/")
 
 ;; Load configuration files
 (load "ui-config.el")
 (load "evil-mode-config.el")
-;;(load "python-config.el")
-(load "org-mode-config.el")
+;;(load "org-mode-config.el")
 (load "dired-config.el")
 (load "calendar-config.el")
 
@@ -138,3 +137,31 @@
 
 ;;(global-set-key (kbd "C-c l") 'display-line-numbers-mode)
 (global-display-line-numbers-mode -1)
+
+;;(use-package vterm
+;;  :ensure t
+;;  :config
+  ;; Map Option + Left Arrow to move one word left
+;;  (define-key vterm-mode-map (kbd "M-<left>") 'backward-word)
+  ;; Map Option + Right Arrow to move one word right
+;;  (define-key vterm-mode-map (kbd "M-<right>") 'forward-word))
+
+(add-hook 'vterm-mode-hook
+          (lambda ()
+            (evil-local-mode -1)))
+
+(use-package vterm
+  :ensure t
+  :config
+  (define-key vterm-mode-map (kbd "M-<left>") 'vterm-send-M-b)
+  (define-key vterm-mode-map (kbd "M-<right>") 'vterm-send-M-f))
+
+
+;; Function to resize window horizontally
+(defun my-resize-window-horizontally (size)
+  "Resize the window horizontally by SIZE."
+  (adjust-window-trailing-edge (selected-window) size t))
+
+;; Key bindings for horizontal resizing
+(global-set-key (kbd "C-c C-h C--") (lambda () (interactive) (my-resize-window-horizontally -5)))  ;; Move left
+(global-set-key (kbd "C-c C-h C-=") (lambda () (interactive) (my-resize-window-horizontally 5)))   ;; Move right
