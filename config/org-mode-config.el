@@ -9,6 +9,9 @@
 
 (setq org-log-reschedule 'time)
 
+(global-set-key "\C-ca" 'org-agenda)
+
+
 (setq org-agenda-files '("/Users/vdrozd/Dropbox/org/daily.org"
                          "/Users/vdrozd/Dropbox/org/work.org"
                          "/Users/vdrozd/Dropbox/org/personal.org"))
@@ -72,3 +75,47 @@
 
 ;; Clock
 (evil-define-key 'insert org-mode-map (kbd "C-c C-x .") 'org-time-stamp)
+
+;; Define global tags with shortcuts
+(setq org-tag-alist
+      '((:startgroup)
+        ("@Alina" . ?a)   ;; Shortcut 'a' for @Alina
+        ("@John" . ?j)    ;; Shortcut 'j' for @John
+        ("@ProjectX" . ?p) ;; Shortcut 'p' for @ProjectX
+        (:endgroup)))
+
+(require 'org-habit)
+(add-to-list 'org-modules 'org-habit)
+
+
+(setq org-habit-graph-column 50) ;; Position of the habit graph in agenda view
+(setq org-habit-preceding-days 28) ;; Number of days to display in the habit graph
+(setq org-habit-following-days 7) ;; Number of future days to display in the habit graph
+
+;; Enable Org Babel languages
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((sql . t)))  ;; Add SQL support
+
+(setq org-src-fontify-natively t) ;; Enable syntax highlighting
+(setq org-src-tab-acts-natively t) ;; Make TAB work in code blocks
+
+;; Enable Org Babel languages, including Java
+;;#+BEGIN_SRC java :classname HelloWorld
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((java . t))) ;; Add Java support
+
+;; Enable Org Babel languages, including Java
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((java . t))) ;; Add Java support
+
+;; Enable Org Babel languages, including Shell
+;; #+BEGIN_SRC sh or #+BEGIN_SRC sh :var name="Alice"
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((shell . t))) ;; Add Shell support
+
+

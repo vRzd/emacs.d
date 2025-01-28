@@ -55,22 +55,72 @@
 (load "evil-mode-config.el")
 (load "dired-config.el")
 (load "calendar-config.el")
+(load "org-mode-config.el")
 
 ;; Vertico for command completion
 (use-package vertico
   :config
-  (vertico-mode))
+  (vertico-mode)
+  (setq vertico-count 3)
+  (setq vertico-cycle t))
+
+
+
+
+
+(add-hook 'org-mode-hook (lambda () (flyspell-mode 1)))
+
+(add-hook 'text-mode-hook 'flyspell-mode)
+(add-hook 'org-mode-hook 'flyspell-mode)
+
+(use-package flyspell
+  :ensure t
+  :hook ((org-mode . flyspell-mode)
+         (text-mode . flyspell-mode))
+  :config
+  ;; Remap correction key to `z=` in Normal mode (similar to Vim)
+  (define-key evil-normal-state-map (kbd "z=") 'flyspell-correct-wrapper))
+
+(defun flyspell-correct-wrapper ()
+  "Call `flyspell-correct-at-point` or `flyspell-correct-word-before-point`."
+  (interactive)
+  (if (evil-normal-state-p)
+      (flyspell-correct-at-point)
+    (flyspell-correct-word-before-point)))
+
+
 
 ;; vterm terminal settings
+
+(add-hook 'vterm-mode-hook (lambda () (evil-emacs-state)))
+(add-hook 'vterm-mode-hook (lambda () (evil-local-mode -1)))
+
+(add-hook 'vterm-mode-hook
+          (lambda ()
+            (evil-local-set-key 'insert (kbd "<delete>") 'vterm-send-delete)
+            (evil-local-set-key 'normal (kbd "<delete>") 'vterm-send-delete)))
+
+
 (use-package vterm
   :ensure t
   :config
   (define-key vterm-mode-map (kbd "M-<left>") 'vterm-send-M-b)
   (define-key vterm-mode-map (kbd "M-<right>") 'vterm-send-M-f)
+  (define-key vterm-mode-map (kbd "<delete>") 'vterm-send-delete)
+  (define-key vterm-mode-map (kbd "<kp-delete>") 'vterm-send-delete)
+  (define-key vterm-mode-map (kbd "S-<backspace>") 'vterm-send-delete)
   (when (eq system-type 'darwin)
     (setq explicit-shell-file-name "zsh"))  ;; macOS zsh
   (when (eq system-type 'windows-nt)
-    (setq explicit-shell-file-name "powershell.exe")))  ;; Windows PowerShell
+    (setq explicit-shell-file-name "powershell.exe"))) ;; Windows
+
+(add-hook 'vterm-mode-hook
+          (lambda ()
+            (define-key vterm-mode-map (kbd "<mouse-4>") nil) ; Forward scroll up
+            (define-key vterm-mode-map (kbd "<mouse-5>") nil))) ; Forward scroll down
+
+
+
 
 ;; Miscellaneous configurations
 (recentf-mode 1)
@@ -111,4 +161,47 @@
 
 (global-set-key (kbd "C-c C-h C--") (lambda () (interactive) (my-resize-window-horizontally -5)))  ;; Shrink
 (global-set-key (kbd "C-c C-h C-=") (lambda () (interactive) (my-resize-window-horizontally 5)))   ;; Expand
+
+
+(global-set-key (kbd "C-c w")
+                (lambda ()
+                  (interactive)
+                  (message (format-time-string "%U"))))
+
+
+(setq treesit-extra-load-path '("~/.emacs.d/tree-sitter/"))
+
+(use-package json-mode
+  :ensure t
+  :hook ((json-mode . json-ts-mode)
+         (json-ts-mode . hs-minor-mode)))
+
+
+
+(use-package persp-mode
+  :ensure t
+  :init
+  (setq persp-autosave-mode t)        ;; Enable auto-saving perspectives
+  :config
+  (persp-mode 1))                     ;; Turn on persp-mode
+
+(setq persp-save-dir "~/.emacs.d/persp-confs/") ;; Directory to store perspectives
+(add-hook 'kill-emacs-hook #'persp-save-state-to-file)
+(add-hook 'emacs-startup-hook #'persp-load-state-from-file)
+
+;; 
+
+(global-set-key (kbd "C-c C-v C-w") 'visual-line-mode)
+(global-set-key (kbd "C-c C-v C-t") 'toggle-truncate-lines)
+
+
+(define-key global-map (kbd "C-c C-l C-n") 'display-line-numbers-mode)
+
+(setq ispell-personal-dictionary "~/.emacs.d/.aspell.en.pws")
+
+
+(setq org-agenda-custom-commands
+      '(("c" "Tags in Current File"
+         tags "" ;; Search all tags
+         ((org-agenda-files (list buffer-file-name))))))
 
