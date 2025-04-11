@@ -25,7 +25,6 @@
 (add-hook 'org-mode-hook 'my-org-mode-autosave-settings)
 
 
-
 (setq org-refile-use-outline-path 'file)
 
 (setq org-refile-allow-creating-parent-nodes t)
@@ -56,20 +55,20 @@
 (require 'org)
 
 ;; Define Org Capture Templates
-(setq org-capture-templates
-      '(("t" "Air Travel" entry
-         (id "travel")
-         (file "~/.emacs.d/templates/research-air-travel.tpl")
-         :prepend t
-         :immediate-finish t)))
+;(setq org-capture-templates
+;      '(("t" "Air Travel" entry
+;         (id "travel")
+;         (file "~/.emacs.d/templates/research-air-travel.tpl")
+;         :prepend t
+;         :immediate-finish t)))
 
 ;; Function to start Org Capture for air travel
-(defun start-air-travel-capture ()
-  "Start Org Capture for air travel template."
-  (interactive)
-  (org-capture nil "t"))
+;(defun start-air-travel-capture ()
+;  "Start Org Capture for air travel template."
+;  (interactive)
+;  (org-capture nil "t"))
 ;; Bind the function to a key, for example, F7
-(global-set-key (kbd "<f7>") 'start-air-travel-capture)
+;(global-set-key (kbd "<f7>") 'start-air-travel-capture)
 
 (global-set-key (kbd "<f6>") 'org-capture)
 
@@ -79,9 +78,9 @@
 ;; Define global tags with shortcuts
 (setq org-tag-alist
       '((:startgroup)
-        ("@Alina" . ?a)   ;; Shortcut 'a' for @Alina
-        ("@John" . ?j)    ;; Shortcut 'j' for @John
-        ("@ProjectX" . ?p) ;; Shortcut 'p' for @ProjectX
+;;        ("@Alina" . ?a)   ;; Shortcut 'a' for @Alina
+;;        ("@John" . ?j)    ;; Shortcut 'j' for @John
+        ("@Project" . ?p) ;; Shortcut 'p' for @ProjectX
         (:endgroup)))
 
 (require 'org-habit)

@@ -6,6 +6,8 @@
 (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
 (package-initialize)
 
+(server-start)
+
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -95,6 +97,22 @@
 (add-hook 'vterm-mode-hook (lambda () (evil-emacs-state)))
 (add-hook 'vterm-mode-hook (lambda () (evil-local-mode -1)))
 
+;(with-eval-after-load 'evil
+;  (with-eval-after-load 'vterm
+;    (add-hook 'vterm-mode-hook
+;              (lambda ()
+;                (evil-local-mode -1)
+;                (evil-escape-mode -1)
+;                (setq-local evil-collection-mode nil)))))
+
+(with-eval-after-load 'evil
+  (add-hook 'vterm-mode-hook
+            (lambda ()
+              (evil-local-mode -1)
+              (evil-escape-mode -1)
+              (setq-local evil-collection-mode nil))))
+
+
 (add-hook 'vterm-mode-hook
           (lambda ()
             (evil-local-set-key 'insert (kbd "<delete>") 'vterm-send-delete)
@@ -120,6 +138,28 @@
             (define-key vterm-mode-map (kbd "<mouse-5>") nil))) ; Forward scroll down
 
 
+(with-eval-after-load 'vterm
+  (define-key vterm-mode-map (kbd "C-s") nil))
+
+
+(use-package vterm-toggle
+  :bind (("C-`" . vterm-toggle)))
+
+(defun my/vterm-set-cursor-for-mode ()
+  "Use a thin cursor in vterm copy mode, block cursor otherwise."
+  (setq cursor-type (if (bound-and-true-p vterm-copy-mode)
+                        'bar   ;; thin vertical bar in copy mode
+                      'box))) ;; block cursor in normal mode
+
+(add-hook 'vterm-copy-mode-hook #'my/vterm-set-cursor-for-mode)
+(add-hook 'vterm-mode-hook #'my/vterm-set-cursor-for-mode)
+
+
+(setq-default cursor-in-non-selected-windows nil)
+
+(defun my/vterm-set-cursor-for-mode ()
+  (setq cursor-type (if (bound-and-true-p vterm-copy-mode) 'bar 'box))
+  (set-cursor-color (if (bound-and-true-p vterm-copy-mode) "orange" "white")))
 
 
 ;; Miscellaneous configurations
@@ -205,3 +245,32 @@
          tags "" ;; Search all tags
          ((org-agenda-files (list buffer-file-name))))))
 
+(defalias 'list-buffers 'ibuffer)
+;; Remap C-x C-b to use ibuffer instead of list-buffers
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+
+(defun ibuffer-search-by-name ()
+  "Search buffers by name in ibuffer."
+  (interactive)
+  (let ((search-term (read-string "Search buffer name: ")))
+    (ibuffer-filter-by-name search-term)))
+
+;; Bind `/` to search by name in ibuffer
+(with-eval-after-load 'ibuffer
+  (define-key ibuffer-mode-map (kbd "/") 'ibuffer-search-by-name)
+  (define-key ibuffer-mode-map (kbd "\\") 'ibuffer-filter-disable)) ; or choose another key
+
+;; For Dired mode
+(setq insert-directory-program "gls")
+(setq dired-use-ls-dired t)
+
+;; YAML
+;; Optional, if not auto-detected
+(add-to-list 'major-mode-remap-alist
+             '(yaml-mode . yaml-ts-mode))
+
+(use-package lsp-mode
+  :hook ((yaml-ts-mode . lsp))
+  :commands lsp)
+
+(use-package lsp-ui :commands lsp-ui-mode)

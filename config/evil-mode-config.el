@@ -1,10 +1,23 @@
 ;; ============================
 ;; EVIL MODE CONFIGURATION
 ;; ============================
+(setq evil-want-keybinding nil)  ;; <== must be BEFORE (require 'evil) or (use-package evil)
+
 (unless (package-installed-p 'evil)
   (package-install 'evil))
 (require 'evil)
 (evil-mode 1)
+
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+(use-package evil-multiedit
+  :config
+  (evil-multiedit-default-keybinds))
+
 
 ;; Additional Evil configurations
 (setq evil-want-C-i-jump nil)
@@ -23,7 +36,9 @@
 (evil-set-undo-system 'undo-tree)
 
 ;; Directory where you want to save undo files
-(setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
+;;(setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
+(unless (file-exists-p "~/.emacs.d/undo")
+  (make-directory "~/.emacs.d/undo"))
 
 
 ;; Disable Evil in specific modes
@@ -60,9 +75,15 @@
 ;; ============================
 ;; Add here any additional customizations or configurations
 
-(evil-define-key 'normal org-mode-map
-  (kbd "RET") 'org-open-at-point
-  (kbd "TAB") 'org-cycle)
+;(evil-define-key 'normal org-mode-map
+;  (kbd "RET") 'org-open-at-point
+;  (kbd "TAB") 'org-cycle)
+
+(with-eval-after-load 'org
+  (evil-define-key 'normal org-mode-map
+    (kbd "RET") 'org-open-at-point
+    (kbd "TAB") 'org-cycle))
+
 
 (with-eval-after-load 'evil
   (define-key evil-normal-state-map (kbd "C-_") nil)
@@ -72,3 +93,33 @@
 
 ;; Open your .emacs or init.el file and add the following line
 (define-key isearch-mode-map (kbd "s-v") 'isearch-yank-kill)
+
+
+(setq evil-normal-state-cursor '("white" box))   ; thin bar in normal mode
+(setq evil-insert-state-cursor '("green" bar))   ; optional: bar in insert mode
+(setq evil-visual-state-cursor '("orange" bar))  ; optional: bar in visual mode
+
+(global-font-lock-mode 1)
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+(use-package highlight-numbers
+  :hook (prog-mode . highlight-numbers-mode))
+
+(use-package hl-todo
+  :hook (prog-mode . hl-todo-mode))
+
+(use-package treesit-auto
+  :when (functionp 'treesit-available-p)
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (global-treesit-auto-mode))
+
+
+(use-package evil-escape
+  :after evil
+  :config
+  (evil-escape-mode)
+  (setq evil-escape-key-sequence "jk"))
