@@ -58,6 +58,7 @@
 (load "dired-config.el")
 (load "calendar-config.el")
 (load "org-mode-config.el")
+;;(load "helm-config.el")
 
 ;; Vertico for command completion
 (use-package vertico
@@ -161,6 +162,43 @@
   (setq cursor-type (if (bound-and-true-p vterm-copy-mode) 'bar 'box))
   (set-cursor-color (if (bound-and-true-p vterm-copy-mode) "orange" "white")))
 
+
+(defvar my/vterm-pwd-result nil
+  "Holds the output of remote pwd command.")
+
+(defun my/vterm-get-remote-pwd ()
+  "Run `pwd` inside vterm and get its result."
+  (interactive)
+  (when (eq major-mode 'vterm-mode)
+    (let ((vterm-buffer (current-buffer)))
+      (setq my/vterm-pwd-result nil)
+      (let ((proc (get-buffer-process vterm-buffer)))
+        (with-current-buffer vterm-buffer
+          (goto-char (point-max))
+          (let ((inhibit-read-only t))
+            (vterm-send-string "pwd && echo __ENDPWD__\n"))
+          (accept-process-output proc 0.2))
+        (sleep-for 0.2) ;; give it a bit of time
+        ;; Grab the last pwd line from buffer
+        (with-current-buffer vterm-buffer
+          (save-excursion
+            (goto-char (point-max))
+            (re-search-backward "__ENDPWD__" nil t)
+            (forward-line -1)
+            (setq my/vterm-pwd-result (string-trim (thing-at-point 'line t)))))))))
+
+(defun open-remote-file-from-vterm ()
+  "Open a remote file from vterm using TRAMP, starting at the remote shell's pwd."
+  (interactive)
+  (let ((remote-host "root@172.20.133.145"))
+    (my/vterm-get-remote-pwd)
+    (if my/vterm-pwd-result
+        (let ((initial-path (concat "/ssh:" remote-host ":" my/vterm-pwd-result "/")))
+          (find-file (read-file-name "Remote file: " initial-path)))
+      (message "Could not detect remote PWD."))))
+
+(with-eval-after-load 'vterm
+  (define-key vterm-mode-map (kbd "C-c o r") #'open-remote-file-from-vterm))
 
 ;; Miscellaneous configurations
 (recentf-mode 1)
@@ -274,3 +312,6 @@
   :commands lsp)
 
 (use-package lsp-ui :commands lsp-ui-mode)
+
+
+(setq vc-follow-symlinks t)
