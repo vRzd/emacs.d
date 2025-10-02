@@ -58,3 +58,35 @@
 ;; Optional customizations
 (which-key-setup-side-window-bottom)
 (setq which-key-idle-delay 0.5)
+
+
+;; Override background after theme load
+(set-face-attribute 'default nil
+                    :background "#1e2430"
+                    :foreground "#d0d0d0")
+
+(custom-set-faces
+ '(mode-line ((t (:background "#2a2f40" :foreground "#ffffff"))))
+ '(mode-line-inactive ((t (:background "#1e2430" :foreground "#888888"))))
+ '(minibuffer-prompt ((t (:foreground "#7aa2f7" :weight bold))))
+  ;; 🪄 override Lisp keyword color
+ '(font-lock-keyword-face ((t (:foreground "#7aa2f7"))))
+ '(font-lock-builtin-face ((t (:foreground "#7e956e"))))
+)
+
+
+
+
+;; Vterm
+
+(custom-set-faces
+ '(vterm-color-blue ((t (:foreground "#5d7f71"))))  ;; or any better shade
+ '(region ((t (:background "#44475a")))))            ;; less harsh highlight
+
+(defun my/vterm-clean-ls-colors ()
+  "Set a cleaner LS_COLORS to remove green backgrounds in vterm."
+  (when (string= major-mode "vterm-mode")
+    ;; No green backgrounds!
+    (vterm-send-string "export LS_COLORS='di=1;34:fi=0:ln=1;36:ex=1;32'\n")))
+
+(add-hook 'vterm-mode-hook #'my/vterm-clean-ls-colors)

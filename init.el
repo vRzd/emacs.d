@@ -1,4 +1,4 @@
-;; ============================
+; ============================
 ;; PACKAGE INITIALIZATION
 ;; ============================
 (require 'package)
@@ -58,6 +58,7 @@
 (load "dired-config.el")
 (load "calendar-config.el")
 (load "org-mode-config.el")
+(load "vterm-config.el")
 ;;(load "helm-config.el")
 
 ;; Vertico for command completion
@@ -95,30 +96,38 @@
 
 ;; vterm terminal settings
 
-(add-hook 'vterm-mode-hook (lambda () (evil-emacs-state)))
+;;(add-hook 'vterm-mode-hook (lambda () (evil-emacs-state)))
 (add-hook 'vterm-mode-hook (lambda () (evil-local-mode -1)))
 
+
 ;(with-eval-after-load 'evil
-;  (with-eval-after-load 'vterm
-;    (add-hook 'vterm-mode-hook
-;              (lambda ()
-;                (evil-local-mode -1)
-;                (evil-escape-mode -1)
-;                (setq-local evil-collection-mode nil)))))
+;  (add-hook 'vterm-mode-hook
+;            (lambda ()
+;              (evil-local-mode -1)
+;              (evil-escape-mode -1)
+;              (setq-local evil-collection-mode nil))))
+(defun my/disable-evil-in-vterm ()
+  (when (derived-mode-p 'vterm-mode)
+    (evil-local-mode -1)
+    (evil-escape-mode -1)
+    (setq-local evil-collection-mode nil)))
 
-(with-eval-after-load 'evil
-  (add-hook 'vterm-mode-hook
-            (lambda ()
-              (evil-local-mode -1)
-              (evil-escape-mode -1)
-              (setq-local evil-collection-mode nil))))
+(add-hook 'vterm-mode-hook #'my/disable-evil-in-vterm)
 
+
+(defun my/disable-evil-in-vterm ()
+   (lambda ()
+     (when (derived-mode-p 'vterm-mode)
+       (evil-local-mode -1)
+       (evil-escape-mode -1)
+       (setq-local evil-collection-mode nil))))
+
+(add-hook 'vterm-mode-hook #'my/disable-evil-in-vterm)
 
 (add-hook 'vterm-mode-hook
           (lambda ()
             (evil-local-set-key 'insert (kbd "<delete>") 'vterm-send-delete)
             (evil-local-set-key 'normal (kbd "<delete>") 'vterm-send-delete)))
-
 
 (use-package vterm
   :ensure t
@@ -128,19 +137,19 @@
   (define-key vterm-mode-map (kbd "<delete>") 'vterm-send-delete)
   (define-key vterm-mode-map (kbd "<kp-delete>") 'vterm-send-delete)
   (define-key vterm-mode-map (kbd "S-<backspace>") 'vterm-send-delete)
+;  (define-key vterm-mode-map (kbd "C-r") nil)
+;  (define-key vterm-mode-map (kbd "C-s") nil)
   (when (eq system-type 'darwin)
     (setq explicit-shell-file-name "zsh"))  ;; macOS zsh
   (when (eq system-type 'windows-nt)
     (setq explicit-shell-file-name "powershell.exe"))) ;; Windows
 
+
+
 (add-hook 'vterm-mode-hook
           (lambda ()
             (define-key vterm-mode-map (kbd "<mouse-4>") nil) ; Forward scroll up
             (define-key vterm-mode-map (kbd "<mouse-5>") nil))) ; Forward scroll down
-
-
-(with-eval-after-load 'vterm
-  (define-key vterm-mode-map (kbd "C-s") nil))
 
 
 (use-package vterm-toggle
@@ -199,6 +208,8 @@
 
 (with-eval-after-load 'vterm
   (define-key vterm-mode-map (kbd "C-c o r") #'open-remote-file-from-vterm))
+
+(setq vterm-max-scrollback 100000)  ;; or any large number you prefer
 
 ;; Miscellaneous configurations
 (recentf-mode 1)
@@ -302,16 +313,82 @@
 (setq insert-directory-program "gls")
 (setq dired-use-ls-dired t)
 
-;; YAML
-;; Optional, if not auto-detected
-(add-to-list 'major-mode-remap-alist
-             '(yaml-mode . yaml-ts-mode))
 
-(use-package lsp-mode
-  :hook ((yaml-ts-mode . lsp))
-  :commands lsp)
-
-(use-package lsp-ui :commands lsp-ui-mode)
-
-
+;; Follow symlinks without prompting
 (setq vc-follow-symlinks t)
+
+
+
+
+
+
+
+
+
+
+
+
+
+;; YAML
+;;; ──────────────────────────────────────────────────────────────────────
+;;;  YAML  ⟶  Tree‑sitter + TAB folding   (with safe fallback)
+;;; ──────────────────────────────────────────────────────────────────────
+
+;;;; 1 ▸  Where grammars live  ───────────────────────────────────────────
+(defvar my/ts-dir (expand-file-name "tree-sitter" user-emacs-directory))
+(make-directory my/ts-dir t)                       ;; create once
+(setq treesit-language-build-root (expand-file-name "src"  my/ts-dir)
+      treesit-extra-load-path     (list my/ts-dir))
+
+;;;; 2 ▸  Tell Emacs where to fetch the YAML grammar  ───────────────────
+(add-to-list 'treesit-language-source-alist
+             '(yaml "https://github.com/ikatyang/tree-sitter-yaml") t)
+
+;;;; 3 ▸  Build the grammar once (quiet)  ───────────────────────────────
+(unless (treesit-language-available-p 'yaml)
+  (ignore-errors (treesit-install-language-grammar 'yaml))) ; fails silently if no compiler
+
+;;;; 4 ▸  Packages  ─────────────────────────────────────────────────────
+;; Built‑ins: don’t let straight try to download them
+(use-package yaml-ts-mode  :straight nil :mode ("\\.ya?ml\\'" . yaml-ts-mode))
+
+;; Grab ts‑fold from GitHub if this Emacs build didn’t ship it
+(use-package ts-fold
+  :if (not (locate-library "ts-fold"))
+  :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold")
+  :defer t)
+
+;; Visual indent guides (external helper)
+(use-package highlight-indent-guides
+  :straight t
+  :hook ((yaml-ts-mode yaml-mode) . highlight-indent-guides-mode)
+  :custom (highlight-indent-guides-method 'character))
+
+;;;; 5 ▸  Master hook: choose the best folding backend  ─────────────────
+(defun my/yaml-setup ()
+  (setq indent-tabs-mode nil tab-width 2)
+
+  (cond
+   ;; 5‑a  Tree‑sitter folding path
+   ((and (treesit-language-available-p 'yaml)
+         (locate-library "ts-fold"))
+    (require 'ts-fold)
+    (ts-fold-mode 1) (ts-fold-indicators-mode 1)
+    (evil-local-set-key 'normal (kbd "<tab>")   #'ts-fold-toggle)
+    (evil-local-set-key 'normal (kbd "<S-tab>") #'ts-fold-toggle-recursively))
+
+   ;; 5‑b  Safe fallback: indent‑based HideShow
+   (t
+    (hs-minor-mode 1)
+    (setq-local hs-block-start-regexp "^\\s-*\\(?:[^:\n]+:\\)\\s-*")
+    (evil-local-set-key 'normal (kbd "<tab>")   #'hs-toggle-hiding)
+    (evil-local-set-key 'normal (kbd "<S-tab>") #'hs-hide-all))))
+
+(add-hook 'yaml-ts-mode-hook #'my/yaml-setup)
+(add-hook 'yaml-mode-hook    #'my/yaml-setup)   ;; just in case
+
+;;;; 6 ▸  Optional linting (needs `pip install yamllint`)  ──────────────
+(add-hook 'yaml-ts-mode-hook #'flymake-mode)
+(add-hook 'yaml-mode-hook    #'flymake-mode)
+
+;;; ── End YAML block ────────────────────────────────────────────────────

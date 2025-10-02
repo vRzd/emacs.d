@@ -4,8 +4,10 @@
 (setq org-startup-align-all-tables t)
 (setq org-startup-shrink-all-tables t)
 
+
 (with-eval-after-load 'org
-  (define-key org-mode-map (kbd "M-<right>") 'org-metaright))
+  (define-key org-mode-map (kbd "M-<right>") 'org-metaright)
+  (define-key org-mode-map (kbd "C-c C-e") nil))
 
 (setq org-log-reschedule 'time)
 
@@ -14,6 +16,7 @@
 
 (setq org-agenda-files '("/Users/vdrozd/Dropbox/org/daily.org"
                          "/Users/vdrozd/Dropbox/org/work.org"
+                         "/Users/vdrozd/Dropbox/org/it.org"
                          "/Users/vdrozd/Dropbox/org/personal.org"))
 (setq auto-save-default t)     ;; Enable autosave
 (setq auto-save-interval 10)   ;; Autosave every 20 keystrokes
@@ -117,4 +120,7 @@
  'org-babel-load-languages
  '((shell . t))) ;; Add Shell support
 
+
+
+(setq org-use-fast-todo-selection 'expert)
 

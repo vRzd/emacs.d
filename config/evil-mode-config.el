@@ -5,9 +5,9 @@
 
 (unless (package-installed-p 'evil)
   (package-install 'evil))
+
 (require 'evil)
 (evil-mode 1)
-
 
 (use-package evil-collection
   :after evil
@@ -17,7 +17,6 @@
 (use-package evil-multiedit
   :config
   (evil-multiedit-default-keybinds))
-
 
 ;; Additional Evil configurations
 (setq evil-want-C-i-jump nil)
@@ -49,8 +48,8 @@
   (evil-set-initial-state 'dired-mode 'emacs)
   (evil-set-initial-state 'Buffer-menu-mode 'emacs)
   (evil-set-initial-state 'org-agenda-mode 'emacs)
-  (evil-set-initial-state 'calendar-mode 'emacs))
-
+  (evil-set-initial-state 'calendar-mode 'emacs)
+  (evil-set-initial-state 'vterm-mode 'emacs))
 ;; ============================
 ;; DIRED MODE CONFIGURATION
 ;; ============================
@@ -123,3 +122,29 @@
   :config
   (evil-escape-mode)
   (setq evil-escape-key-sequence "jk"))
+
+(defun my/toggle-global-evil-mode ()
+  "Toggle Evil mode globally."
+  (interactive)
+  (if evil-mode
+      (progn
+        (evil-mode -1)
+        (message "Evil mode OFF globally"))
+    (progn
+      (evil-mode 1)
+      (message "Evil mode ON globally"))))
+
+(global-set-key (kbd "C-c C-e C-g") #'my/toggle-global-evil-mode)
+
+(defun my/toggle-evil-local-mode ()
+  "Toggle Evil mode in the current buffer only."
+  (interactive)
+  (if (bound-and-true-p evil-local-mode)
+      (progn
+        (evil-local-mode -1)
+        (message "Evil mode OFF in this buffer"))
+    (progn
+      (evil-local-mode 1)
+      (message "Evil mode ON in this buffer"))))
+
+(global-set-key (kbd "C-c C-e C-l") #'my/toggle-evil-local-mode)
