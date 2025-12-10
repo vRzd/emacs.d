@@ -40,6 +40,15 @@
 (setq straight-use-package-by-default t)
 (straight-use-package 'use-package)
 
+;; languagues 
+(use-package reverse-im
+  :ensure t
+  :custom
+  ;; Replace with the layouts you use
+  (reverse-im-input-methods '("russian-computer"))
+  :config
+  (reverse-im-mode 1))
+
 (eval-when-compile
   (require 'use-package))
 
@@ -82,8 +91,9 @@
   :hook ((org-mode . flyspell-mode)
          (text-mode . flyspell-mode))
   :config
+  )
   ;; Remap correction key to `z=` in Normal mode (similar to Vim)
-  (define-key evil-normal-state-map (kbd "z=") 'flyspell-correct-wrapper))
+  ;;(define-key evil-normal-state-map (kbd "z=") 'flyspell-correct-wrapper))
 
 (defun flyspell-correct-wrapper ()
   "Call `flyspell-correct-at-point` or `flyspell-correct-word-before-point`."
@@ -165,8 +175,8 @@
 
 ;; 
 
-(global-set-key (kbd "C-c C-v C-w") 'visual-line-mode)
-(global-set-key (kbd "C-c C-v C-t") 'toggle-truncate-lines)
+(global-set-key (kbd "C-c C-l C-w") 'visual-line-mode)
+(global-set-key (kbd "C-c C-l C-t") 'toggle-truncate-lines)
 
 
 (define-key global-map (kbd "C-c C-l C-n") 'display-line-numbers-mode)

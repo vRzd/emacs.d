@@ -1,150 +1,102 @@
+;;; evil-config.el --- Evil setup for Org & Elisp only
+
 ;; ============================
-;; EVIL MODE CONFIGURATION
+;; Base Evil Setup
 ;; ============================
-(setq evil-want-keybinding nil)  ;; <== must be BEFORE (require 'evil) or (use-package evil)
+(setq evil-want-keybinding nil) ;; must be set before loading evil
 
-(unless (package-installed-p 'evil)
-  (package-install 'evil))
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-fine-undo t)
+  (setq evil-want-C-i-jump nil)
+  :config
+  ;; DO NOT enable globally → no (evil-mode 1)
 
-(require 'evil)
-(evil-mode 1)
+  ;; Enable Evil ONLY in Org and Emacs Lisp buffers
+  (add-hook 'org-mode-hook #'evil-local-mode)
+  (add-hook 'emacs-lisp-mode-hook #'evil-local-mode)
 
+  ;; Cursor appearance
+  (setq evil-normal-state-cursor '("white" box))
+  (setq evil-insert-state-cursor '("green" bar))
+  (setq evil-visual-state-cursor '("orange" bar))
+
+  ;; Fix when switching keyboard layouts (Russian <-> English)
+  (add-hook 'input-method-activate-hook  #'evil-normalize-keymaps)
+  (add-hook 'input-method-inactivate-hook #'evil-normalize-keymaps))
+
+;; ============================
+;; Evil Collection (for org + elisp + help)
+;; ============================
 (use-package evil-collection
   :after evil
   :config
+  ;; DO NOT load for org-agenda
+  (setq evil-collection-mode-list '(org help emacs-lisp))
   (evil-collection-init))
 
-(use-package evil-multiedit
+;; ============================
+;; Undo Tree
+;; ============================
+(use-package undo-tree
+  :ensure t
   :config
-  (evil-multiedit-default-keybinds))
+  (global-undo-tree-mode)
+  (evil-set-undo-system 'undo-tree))
 
-;; Additional Evil configurations
-(setq evil-want-C-i-jump nil)
-(setq evil-want-fine-undo t)
-
-;; Conditional Key Binding for Evil
-(when evil-want-C-i-jump
-  (define-key evil-motion-state-map (kbd "C-i") 'evil-jump-forward))
-
-;; Set the undo system for Evil with 'undo-tree'
-(unless (package-installed-p 'undo-tree)
-  (package-refresh-contents)
-  (package-install 'undo-tree))
-(require 'undo-tree)
-(global-undo-tree-mode)
-(evil-set-undo-system 'undo-tree)
-
-;; Directory where you want to save undo files
-;;(setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
 (unless (file-exists-p "~/.emacs.d/undo")
   (make-directory "~/.emacs.d/undo"))
 
-
-;; Disable Evil in specific modes
-(with-eval-after-load 'evil
-  (evil-set-initial-state 'nov-mode 'emacs)
-  (evil-set-initial-state 'term-mode 'emacs)
-  (evil-set-initial-state 'eshell-mode 'emacs)
-  (evil-set-initial-state 'dired-mode 'emacs)
-  (evil-set-initial-state 'Buffer-menu-mode 'emacs)
-  (evil-set-initial-state 'org-agenda-mode 'emacs)
-  (evil-set-initial-state 'calendar-mode 'emacs)
-  (evil-set-initial-state 'vterm-mode 'emacs))
 ;; ============================
-;; DIRED MODE CONFIGURATION
+;; Remove conflicting bindings
 ;; ============================
-;; Automatically hide details in Dired mode
-(add-hook 'dired-mode-hook #'dired-hide-details-mode)
-
-;; Custom function to disable Evil in Dired mode explicitly
-(defun disable-evil-in-dired ()
-  (evil-emacs-state))
-(add-hook 'dired-mode-hook 'disable-evil-in-dired)
-
-
-;; !!! TODO moving to init.el
-;; Setting for moving deleted files to trash
-(setq delete-by-moving-to-trash t)
-
-;; Vertico Directory Tidy
-(add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
-
-;; ============================
-;; ADDITIONAL CUSTOMIZATIONS
-;; ============================
-;; Add here any additional customizations or configurations
-
-;(evil-define-key 'normal org-mode-map
-;  (kbd "RET") 'org-open-at-point
-;  (kbd "TAB") 'org-cycle)
-
-(with-eval-after-load 'org
-  (evil-define-key 'normal org-mode-map
-    (kbd "RET") 'org-open-at-point
-    (kbd "TAB") 'org-cycle))
-
-
 (with-eval-after-load 'evil
   (define-key evil-normal-state-map (kbd "C-_") nil)
   (define-key evil-visual-state-map (kbd "C-_") nil)
   (define-key evil-insert-state-map (kbd "C-_") nil)
   (define-key evil-motion-state-map (kbd "C-_") nil))
 
-;; Open your .emacs or init.el file and add the following line
-(define-key isearch-mode-map (kbd "s-v") 'isearch-yank-kill)
+;; ============================
+;; macOS Clipboard Sync
+;; ============================
+(setq select-enable-clipboard t)
+(setq save-interprogram-paste-before-kill t)
 
+(defun my/copy-to-macos-clipboard (text &optional _push)
+  "Copy TEXT to macOS clipboard using pbcopy."
+  (when (eq system-type 'darwin)
+    (with-temp-buffer
+      (insert text)
+      (call-process-region (point-min) (point-max) "pbcopy"))))
 
-(setq evil-normal-state-cursor '("white" box))   ; thin bar in normal mode
-(setq evil-insert-state-cursor '("green" bar))   ; optional: bar in insert mode
-(setq evil-visual-state-cursor '("orange" bar))  ; optional: bar in visual mode
+(defun my/paste-from-macos-clipboard ()
+  "Paste from macOS clipboard."
+  (when (eq system-type 'darwin)
+    (shell-command-to-string "pbpaste")))
 
-(global-font-lock-mode 1)
+(setq interprogram-cut-function #'my/copy-to-macos-clipboard)
+(setq interprogram-paste-function #'my/paste-from-macos-clipboard)
 
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+;; Visual-mode yank → macOS clipboard
+(defun my/evil-yank-macos (beg end &optional _type _reg _handler)
+  (interactive "r")
+  (evil-yank beg end _type _reg _handler)
+  (let ((text (buffer-substring-no-properties beg end)))
+    (my/copy-to-macos-clipboard text)))
 
-(use-package highlight-numbers
-  :hook (prog-mode . highlight-numbers-mode))
+(with-eval-after-load 'evil
+  (evil-define-key 'visual org-mode-map         (kbd "y") #'my/evil-yank-macos)
+  (evil-define-key 'visual emacs-lisp-mode-map  (kbd "y") #'my/evil-yank-macos))
 
-(use-package hl-todo
-  :hook (prog-mode . hl-todo-mode))
+;; ============================
+;; Org-specific keys (ONLY org-mode)
+;; ============================
+(with-eval-after-load 'org
+  (evil-define-key 'normal org-mode-map
+    (kbd "RET") #'org-open-at-point
+    (kbd "TAB") #'org-cycle)) ;; cycle only inside org-buffer
 
-(use-package treesit-auto
-  :when (functionp 'treesit-available-p)
-  :custom
-  (treesit-auto-install 'prompt)
-  :config
-  (global-treesit-auto-mode))
-
-
-(use-package evil-escape
-  :after evil
-  :config
-  (evil-escape-mode)
-  (setq evil-escape-key-sequence "jk"))
-
-(defun my/toggle-global-evil-mode ()
-  "Toggle Evil mode globally."
-  (interactive)
-  (if evil-mode
-      (progn
-        (evil-mode -1)
-        (message "Evil mode OFF globally"))
-    (progn
-      (evil-mode 1)
-      (message "Evil mode ON globally"))))
-
-(global-set-key (kbd "C-c C-e C-g") #'my/toggle-global-evil-mode)
-
-(defun my/toggle-evil-local-mode ()
-  "Toggle Evil mode in the current buffer only."
-  (interactive)
-  (if (bound-and-true-p evil-local-mode)
-      (progn
-        (evil-local-mode -1)
-        (message "Evil mode OFF in this buffer"))
-    (progn
-      (evil-local-mode 1)
-      (message "Evil mode ON in this buffer"))))
-
-(global-set-key (kbd "C-c C-e C-l") #'my/toggle-evil-local-mode)
+(provide 'evil-config)
+;;; evil-config.el ends here
