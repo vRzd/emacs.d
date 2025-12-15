@@ -143,4 +143,4 @@
     (kbd "<tab>") #'my/org-tab-toggle))
 
 (provide 'org-config)
-;;; org-config.el ends here
+;;; org-mode-config.el ends here

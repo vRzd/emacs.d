@@ -1,12 +1,15 @@
-;;; init.el --- Your config, fixed -*- lexical-binding: t; -*-
+;;; init.el --- Core bootstrap only -*- lexical-binding: t; -*-
 
-;; -------------------------------------
-;; Package System (package.el only)
-;; -------------------------------------
+;; ============================================================
+;; Package system (package.el only)
+;; ============================================================
+
 (require 'package)
+
 (setq package-archives
       '(("gnu"   . "https://elpa.gnu.org/packages/")
         ("melpa" . "https://melpa.org/packages/")))
+
 (package-initialize)
 
 (unless package-archive-contents
@@ -18,67 +21,87 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
-;; -------------------------------------
-;; MINIBUFFER FIX (THIS IS THE IMPORTANT PART)
-;; -------------------------------------
+;; ============================================================
+;; Custom file (keep Custom OUT of init.el)
+;; ============================================================
 
-;; Restore classic behavior for C-r and TAB
-(setq completion-styles '(basic partial-completion))
-(setq completion-category-defaults nil)
-(setq completion-category-overrides nil)
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(when (file-exists-p custom-file)
+  (load custom-file))
 
-;; Limit minibuffer height
-(setq resize-mini-windows t)
-(setq max-mini-window-height 3)
+;; ============================================================
+;; Minibuffer CORE behavior (logic, not UI)
+;; ============================================================
 
-;; -------------------------------------
-;; Vertico (ONLY presentation, not logic)
-;; -------------------------------------
+(setq completion-styles '(basic partial-completion)
+      completion-category-defaults nil
+      completion-category-overrides nil
+      resize-mini-windows t
+      max-mini-window-height 3
+      enable-recursive-minibuffers t)
+
+;; ============================================================
+;; Save minibuffer / search history (REQUIRED for C-r)
+;; ============================================================
+
+(use-package savehist
+  :init
+  (setq history-length 1000
+        savehist-additional-variables
+        '(kill-ring search-ring regexp-search-ring))
+  (savehist-mode 1))
+
+;; ============================================================
+;; Vertico (UI only, does NOT change logic)
+;; ============================================================
+
 (use-package vertico
   :init
-  (vertico-mode)
+  (vertico-mode 1)
   :custom
   (vertico-count 3)
   (vertico-cycle t))
 
-;; -------------------------------------
-;; Load YOUR existing config files
-;; -------------------------------------
+;; ============================================================
+;; Consult (history & navigation)
+;; ============================================================
+
+(use-package consult
+  :config
+  ;; Proper minibuffer completion integration
+  (setq completion-in-region-function #'consult-completion-in-region)
+
+  ;; Global, sane bindings (NOT minibuffer hacks)
+  (global-set-key (kbd "C-s") #'consult-line)
+  (global-set-key (kbd "M-y") #'consult-yank-pop))
+
+;; ============================================================
+;; Load modular configuration files
+;; ============================================================
+
 (add-to-list 'load-path (expand-file-name "config" user-emacs-directory))
 
-(load "ui-config.el")
-(load "evil-mode-config.el")   ;; untouched
-(load "dired-config.el")
-(load "calendar-config.el")
-(load "org-mode-config.el")
-(load "vterm-config.el")
+;; IMPORTANT:
+;;  - Each file MUST end with (provide 'FEATURE)
+;;  - NONE of these files may require themselves
 
-;; -------------------------------------
-;; macOS clipboard
-;; -------------------------------------
-(when (eq system-type 'darwin)
-  (setq select-enable-clipboard t
-        select-enable-primary t
-        save-interprogram-paste-before-kill t)
+(require 'ui-config)
+(require 'evil-mode-config)
+(require 'dired-config)
+(require 'calendar-config)
+(require 'org-config)
+(require 'vterm-config)
+(require 'clipboard-config)
 
-  (global-set-key (kbd "s-c") #'kill-ring-save)
-  (global-set-key (kbd "s-x") #'kill-region)
-  (global-set-key (kbd "s-v") #'yank))
+;; ============================================================
+;; General sanity
+;; ============================================================
 
-;; -------------------------------------
-;; History & sanity
-;; -------------------------------------
 (save-place-mode 1)
-(savehist-mode 1)
 (recentf-mode 1)
 
 (setq ring-bell-function 'ignore
       use-short-answers t)
-
-
-;; Text
-(with-eval-after-load 'org
-  (define-key org-mode-map (kbd "C-c C-v C-t") #'toggle-truncate-lines))
 
 (provide 'init)
 ;;; init.el ends here

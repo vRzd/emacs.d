@@ -1,112 +1,89 @@
-;;; evil-mode-config.el --- Evil setup for Org & Elisp only -*- lexical-binding: t; -*-
+;;; evil-mode-config.el --- Evil only where explicitly enabled -*- lexical-binding: t; -*-
 
-;; ============================
-;; Base Evil Setup
-;; ============================
-(setq evil-want-keybinding nil) ;; must be set before loading evil
+;; ============================================================
+;; Evil core (local-only, clean, reload-safe)
+;; ============================================================
+
+;; IMPORTANT: must be set BEFORE evil loads
+(setq evil-want-keybinding nil)
+(setq evil-want-minibuffer nil) ;; <- critical: prevents Evil from touching minibuffer
 
 (use-package evil
   :ensure t
   :init
+  (setq evil-want-integration t
+        evil-want-fine-undo t
+        evil-want-C-i-jump nil)
 
-  (setq evil-want-integration t)
-  (setq evil-want-fine-undo t)
-  (setq evil-want-C-i-jump nil)
   :config
-  ;; DO NOT enable globally → no (evil-mode 1)
+  ;; Start Evil engine (needed so evil-local-mode works)
+  (evil-mode 1)
 
-  ;; Enable Evil ONLY in Org and Emacs Lisp buffers
-  (add-hook 'org-mode-hook #'evil-local-mode)
-  (add-hook 'emacs-lisp-mode-hook #'evil-local-mode)
+  ;; Default everywhere = Emacs state (so nothing gets Evil unless we enable it)
+  (setq evil-default-state 'emacs)
 
-  ;; Cursor appearance
-  (setq evil-normal-state-cursor '("white" box))
-  (setq evil-insert-state-cursor '("green" bar))
-  (setq evil-visual-state-cursor '("orange" bar))
+  ;; Enable Evil ONLY in Org & Emacs Lisp
+  (dolist (hook '(org-mode-hook emacs-lisp-mode-hook))
+    (add-hook hook
+              (lambda ()
+                (evil-local-mode 1)
+                (evil-normal-state))))
 
-  ;; Fix when switching keyboard layouts (Russian <-> English)
-  (add-hook 'input-method-activate-hook  #'evil-normalize-keymaps)
-  (add-hook 'input-method-inactivate-hook #'evil-normalize-keymaps))
+  ;; Extra safety: minibuffer always Emacs state
+  (add-hook 'minibuffer-setup-hook #'evil-emacs-state)
 
-;; ============================
-;; Evil Collection (for org + elisp + help)
-;; ============================
+  ;; Hard exclusions (safety net)
+  (dolist (mode '(help-mode helpful-mode Man-mode woman-mode
+                  vterm-mode term-mode eshell-mode shell-mode
+                  compilation-mode))
+    (add-to-list 'evil-emacs-state-modes mode))
+
+  ;; ESC always goes to Normal (only matters in buffers where Evil is active)
+  (define-key evil-insert-state-map  [escape] #'evil-force-normal-state)
+  (define-key evil-visual-state-map  [escape] #'evil-force-normal-state)
+  (define-key evil-replace-state-map [escape] #'evil-force-normal-state))
+
+;; ============================================================
+;; Russian keyboard → Vim keys
+;; ============================================================
+
+(use-package reverse-im
+  :ensure t
+  :demand t
+  :custom
+  (reverse-im-input-methods '("russian-computer"))
+  :config
+  (reverse-im-mode 1))
+
+;; ============================================================
+;; Evil Collection — ONLY Org
+;; ============================================================
+
 (use-package evil-collection
   :after evil
   :config
-  ;; DO NOT load for org-agenda
-  (setq evil-collection-mode-list '(org help emacs-lisp))
+  (setq evil-collection-mode-list '(org))
   (evil-collection-init))
 
-;; ============================
+;; ============================================================
 ;; Undo Tree
-;; ============================
+;; ============================================================
+
 (use-package undo-tree
   :ensure t
   :config
-  (global-undo-tree-mode)
+  (global-undo-tree-mode 1)
   (evil-set-undo-system 'undo-tree))
 
-(unless (file-exists-p "~/.emacs.d/undo")
-  (make-directory "~/.emacs.d/undo"))
+;; ============================================================
+;; Org-specific Evil keys
+;; ============================================================
 
-;; ============================
-;; Remove conflicting bindings
-;; ============================
-(with-eval-after-load 'evil
-  (define-key evil-normal-state-map (kbd "C-_") nil)
-  (define-key evil-visual-state-map (kbd "C-_") nil)
-  (define-key evil-insert-state-map (kbd "C-_") nil)
-  (define-key evil-motion-state-map (kbd "C-_") nil))
-
-;; ============================
-;; macOS Clipboard Sync
-;; ============================
-(setq select-enable-clipboard t)
-(setq save-interprogram-paste-before-kill t)
-
-(defun my/copy-to-macos-clipboard (text &optional _push)
-  "Copy TEXT to macOS clipboard using pbcopy."
-  (when (eq system-type 'darwin)
-    (with-temp-buffer
-      (insert text)
-      (call-process-region (point-min) (point-max) "pbcopy"))))
-
-(defun my/paste-from-macos-clipboard ()
-  "Paste from macOS clipboard."
-  (when (eq system-type 'darwin)
-    (shell-command-to-string "pbpaste")))
-
-(setq interprogram-cut-function #'my/copy-to-macos-clipboard)
-(setq interprogram-paste-function #'my/paste-from-macos-clipboard)
-
-;; Visual-mode yank → macOS clipboard
-(defun my/evil-yank-macos (beg end &optional _type _reg _handler)
-  (interactive "r")
-  (evil-yank beg end _type _reg _handler)
-  (let ((text (buffer-substring-no-properties beg end)))
-    (my/copy-to-macos-clipboard text)))
-
-(with-eval-after-load 'evil
-  (evil-define-key 'visual org-mode-map         (kbd "y") #'my/evil-yank-macos)
-  (evil-define-key 'visual emacs-lisp-mode-map  (kbd "y") #'my/evil-yank-macos))
-
-;; ============================
-;; Org-specific keys (ONLY org-mode)
-;; ============================
 (with-eval-after-load 'org
-  (evil-define-key 'normal org-mode-map
-    (kbd "RET") #'org-open-at-point
-    (kbd "TAB") #'org-cycle)) ;; cycle only inside org-buffer
-
-
-;; ============================
-;; Emacs plus
-;; ============================
-(setq evil-collection-mode-list
-      '(org help emacs-lisp)) ; remove magit
-(setq evil-collection-mode-list '(org help emacs-lisp))
-
+  (with-eval-after-load 'evil
+    (evil-define-key 'normal org-mode-map
+      (kbd "RET") #'org-open-at-point
+      (kbd "TAB") #'org-cycle)))
 
 (provide 'evil-mode-config)
 ;;; evil-mode-config.el ends here

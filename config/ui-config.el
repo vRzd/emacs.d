@@ -17,7 +17,6 @@
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (setq visible-bell nil)
-(save-place-mode 1)
 
 (require 'windmove)
 (global-set-key (kbd "M-s-<up>")    #'windmove-up)
@@ -110,16 +109,16 @@
   (setq standard-display-table (make-display-table)))
 (set-display-table-slot standard-display-table 'vertical-border nil)
 
-;; ----------------------------------------------------------
-;; VTERM COLOR FIX
-;; ----------------------------------------------------------
 
-(defun my/vterm-clean-ls-colors ()
-  (when (string= major-mode "vterm-mode")
-    (vterm-send-string
-     "export LS_COLORS='di=1;34:fi=0:ln=1;36:ex=1;32'\n")))
 
-(add-hook 'vterm-mode-hook #'my/vterm-clean-ls-colors)
+
+;; ----------------------------------------------------------
+;; TEXT SUGAR
+;; ----------------------------------------------------------
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c C-v C-t") #'toggle-truncate-lines))
+
+
 
 (provide 'ui-config)
 ;;; ui-config.el ends here

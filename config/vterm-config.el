@@ -83,72 +83,6 @@
 (add-hook 'vterm-mode-hook #'my/vterm-disable-mouse-scroll)
 
 ;; ----------------------------------
-;; Yank to clipboard
-;; ----------------------------------
-(defun my/vterm-yank-to-clipboard ()
-  "Yank selected region in `vterm-copy-mode` to system clipboard."
-  (interactive)
-  (when (use-region-p)
-    (let ((text (buffer-substring-no-properties (region-beginning) (region-end))))
-      (kill-new text)
-      (if (display-graphic-p)
-          (gui-set-selection 'CLIPBOARD text)
-        ;; Terminal fallback with xclip/wl-copy
-        (let ((proc (start-process "xclip" nil "xclip" "-selection" "clipboard")))
-          (process-send-string proc text)
-          (process-send-eof proc)))
-      (deactivate-mark)
-      (message "Copied to clipboard"))))
-
-(with-eval-after-load 'vterm
-  (define-key vterm-copy-mode-map (kbd "y") #'my/vterm-yank-to-clipboard)
-  (define-key vterm-mode-map (kbd "C-c y") #'my/vterm-yank-to-clipboard))
-
-(add-hook 'vterm-mode-hook
-          (lambda ()
-            (evil-define-key 'visual vterm-mode-map
-              (kbd "y") #'my/vterm-yank-to-clipboard)))
-
-;; ----------------------------------
-;; Remote file opening via TRAMP
-;; ----------------------------------
-(defvar my/vterm-pwd-result nil
-  "Holds the output of remote pwd command.")
-
-(defun my/vterm-get-remote-pwd ()
-  "Run `pwd` inside vterm and get its result."
-  (interactive)
-  (when (eq major-mode 'vterm-mode)
-    (let ((vterm-buffer (current-buffer)))
-      (setq my/vterm-pwd-result nil)
-      (let ((proc (get-buffer-process vterm-buffer)))
-        (with-current-buffer vterm-buffer
-          (goto-char (point-max))
-          (let ((inhibit-read-only t))
-            (vterm-send-string "pwd && echo __ENDPWD__\n"))
-          (accept-process-output proc 0.2))
-        (sleep-for 0.2)
-        (with-current-buffer vterm-buffer
-          (save-excursion
-            (goto-char (point-max))
-            (re-search-backward "__ENDPWD__" nil t)
-            (forward-line -1)
-            (setq my/vterm-pwd-result (string-trim (thing-at-point 'line t)))))))))
-
-(defun open-remote-file-from-vterm ()
-  "Open a remote file from vterm using TRAMP, starting at the remote shell's pwd."
-  (interactive)
-  (let ((remote-host "root@172.20.133.145"))
-    (my/vterm-get-remote-pwd)
-    (if my/vterm-pwd-result
-        (let ((initial-path (concat "/ssh:" remote-host ":" my/vterm-pwd-result "/")))
-          (find-file (read-file-name "Remote file: " initial-path)))
-      (message "Could not detect remote PWD."))))
-
-(with-eval-after-load 'vterm
-  (define-key vterm-mode-map (kbd "C-c o r") #'open-remote-file-from-vterm))
-
-;; ----------------------------------
 ;; Ensure macOS env variables sync with shell
 ;; ----------------------------------
 (use-package exec-path-from-shell
@@ -162,3 +96,7 @@
   (vterm))
 
 (global-set-key (kbd "C-c C-v C-t") #'my/vterm-open-new)
+
+(provide 'vterm-config)
+;;; vterm-config.el ends here
+

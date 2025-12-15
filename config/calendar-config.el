@@ -37,3 +37,6 @@
 
 (add-hook 'calendar-today-visible-hook 'my-calendar-show-holidays)
 (add-hook 'calendar-today-invisible-hook 'my-calendar-show-holidays)
+
+(provide 'calendar-config)
+;;; calendar-config.el ends here
