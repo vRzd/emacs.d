@@ -1,3 +1,5 @@
+;;; calendar-config.el --- My Emacs config -*- lexical-binding: t; -*-
+
 (require 'calendar)
 (require 'holidays)
 

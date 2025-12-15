@@ -1,4 +1,4 @@
-;;; evil-config.el --- Evil setup for Org & Elisp only
+;;; evil-mode-config.el --- Evil setup for Org & Elisp only -*- lexical-binding: t; -*-
 
 ;; ============================
 ;; Base Evil Setup
@@ -8,6 +8,7 @@
 (use-package evil
   :ensure t
   :init
+
   (setq evil-want-integration t)
   (setq evil-want-fine-undo t)
   (setq evil-want-C-i-jump nil)
@@ -98,5 +99,14 @@
     (kbd "RET") #'org-open-at-point
     (kbd "TAB") #'org-cycle)) ;; cycle only inside org-buffer
 
-(provide 'evil-config)
-;;; evil-config.el ends here
+
+;; ============================
+;; Emacs plus
+;; ============================
+(setq evil-collection-mode-list
+      '(org help emacs-lisp)) ; remove magit
+(setq evil-collection-mode-list '(org help emacs-lisp))
+
+
+(provide 'evil-mode-config)
+;;; evil-mode-config.el ends here

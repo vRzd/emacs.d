@@ -1,3 +1,5 @@
+;;; vterm-config.el --- My Emacs config -*- lexical-binding: t; -*-
+
 ;; ============================
 ;; VTERM CONFIGURATION
 ;; ============================

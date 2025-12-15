@@ -1,130 +1,141 @@
-;;; dired-config.el --- Complete Dired setup with Evil support
+;;; dired-config.el --- Complete Dired setup with Evil support -*- lexical-binding: t; -*-
+;;; Commentary:
+;; Clean, stable Dired setup (no straight.el, no missing packages).
+;;; Code:
+
+(require 'dired)
 
 ;; ===========================
 ;; Core Dired Setup
 ;; ===========================
 (use-package dired
-  :straight nil
+  :ensure nil        ;; built-in
   :commands (dired dired-jump)
   :bind (("C-x C-j" . dired-jump))
   :custom
-  ;; Use GNU ls for macOS color support
-  (insert-directory-program (if (executable-find "gls") "gls" insert-directory-program))
-  ;; Use clean one-column listing with colors
-  (dired-listing-switches "-1 --group-directories-first --color=always")
+  ;; Use GNU ls for macOS color
+  (insert-directory-program
+   (or (executable-find "gls") insert-directory-program))
+
+  ;; One column, directories first
+  (dired-listing-switches "-alh --group-directories-first")
+
   ;; Move to trash instead of deleting
   (delete-by-moving-to-trash t)
-  :hook ((dired-mode . dired-hide-details-mode) ;; Hide metadata
-         (dired-mode . hl-line-mode)            ;; Highlight current line
-         (dired-mode . evil-normalize-keymaps)) ;; Apply Evil keys
-  :config
-  ;; Optional: omit hidden files unless toggled
-  (setq dired-omit-files "^\\.[^.].*"))
+
+  :hook
+  ((dired-mode . dired-hide-details-mode)
+   (dired-mode . hl-line-mode)
+   (dired-mode . evil-normalize-keymaps)))
 
 ;; ===========================
 ;; Evil Integration
 ;; ===========================
 (use-package evil-collection
   :after evil
-  :custom
-  (evil-collection-mode-list '(dired))
   :config
-  (evil-collection-init))
+  (evil-collection-init 'dired))
 
 ;; ===========================
-;; Dired Enhancements
+;; Replacement for dired-single
+;; (use built-in navigation)
 ;; ===========================
-(use-package dired-single
-  :after dired
-  :config
+(with-eval-after-load 'dired
   (evil-define-key 'normal dired-mode-map
-    "h" 'dired-single-up-directory
-    "l" 'dired-single-buffer))
+    "h" #'dired-up-directory
+    "l" #'dired-find-file))
 
+;; ===========================
+;; dired-ranger (copy, paste, move)
+;; ===========================
 (use-package dired-ranger
-  :after dired
+  :ensure t
   :config
   (evil-define-key 'normal dired-mode-map
-    "yy" 'dired-ranger-copy
-    "p"  'dired-ranger-paste
-    "x"  'dired-ranger-move))
+    "yy" #'dired-ranger-copy
+    "p"  #'dired-ranger-paste
+    "x"  #'dired-ranger-move))
 
+;; ===========================
+;; Dotfiles toggle
+;; ===========================
 (use-package dired-hide-dotfiles
-  :after dired
+  :ensure t
   :hook (dired-mode . dired-hide-dotfiles-mode)
   :config
   (evil-define-key 'normal dired-mode-map
-    "H" 'dired-hide-dotfiles-mode))
+    "H" #'dired-hide-dotfiles-mode))
 
+;; ===========================
+;; Icons
+;; ===========================
 (use-package all-the-icons-dired
-  :after dired
+  :ensure t
   :hook (dired-mode . all-the-icons-dired-mode))
 
+;; ===========================
+;; dired-open (open with macOS)
+;; ===========================
 (use-package dired-open
-  :after dired
+  :ensure t
   :config
   (setq dired-open-extensions
-        '(("png" . "feh")
-          ("jpg" . "feh")
-          ("mp4" . "mpv")
+        '(("png" . "open")
+          ("jpg" . "open")
+          ("mp4" . "open")
           ("pdf" . "open"))))
 
 ;; ===========================
-;; Custom File & Folder Creation
+;; Create File / Folder
 ;; ===========================
 (defun my/dired-create-file ()
-  "Prompt for a new file name and create it in the current Dired directory."
+  "Create an empty file in Dired."
   (interactive)
   (let* ((default-directory (dired-current-directory))
-         (filename (read-string "New file name: "))
-         (full-path (expand-file-name filename default-directory)))
-    (if (file-exists-p full-path)
-        (message "File already exists: %s" full-path)
-      (write-region "" nil full-path)
+         (name (read-string "New file: "))
+         (path (expand-file-name name default-directory)))
+    (if (file-exists-p path)
+        (message "File exists: %s" path)
+      (write-region "" nil path)
       (revert-buffer)
-      (message "Created file: %s" full-path))))
+      (message "Created file: %s" path))))
 
 (defun my/dired-create-folder ()
-  "Prompt for a new folder name and create it in the current Dired directory."
+  "Create a folder in Dired."
   (interactive)
   (let* ((default-directory (dired-current-directory))
-         (foldername (read-string "New folder name: "))
-         (full-path (expand-file-name foldername default-directory)))
-    (if (file-exists-p full-path)
-        (message "Folder already exists: %s" full-path)
-      (make-directory full-path)
+         (name (read-string "New folder: "))
+         (path (expand-file-name name default-directory)))
+    (if (file-exists-p path)
+        (message "Folder exists: %s" path)
+      (make-directory path)
       (revert-buffer)
-      (message "Created folder: %s" full-path))))
+      (message "Created folder: %s" path))))
 
 ;; ===========================
-;; Search / Jump by Filename
+;; Search / Jump
 ;; ===========================
-
 (defun my/dired-jump-to-file ()
-  "Jump to a file in the current Dired buffer by typing its name."
+  "Jump to a file by substring search."
   (interactive)
-  (let ((query (read-string "Jump to file: ")))
+  (let ((query (read-string "Find: ")))
     (goto-char (point-min))
     (if (search-forward query nil t)
         (progn
           (beginning-of-line)
           (dired-move-to-filename)
-          (message "Jumped to file: %s" query))
-      (message "No file matching '%s' found" query))))
+          (message "Found: %s" query))
+      (message "No match: %s" query))))
 
 ;; ===========================
-;; Final Keybinding Setup
+;; Final Extra Keybindings
 ;; ===========================
-(with-eval-after-load 'dired-open
-  (define-key dired-mode-map (kbd "f") nil))
-
-(with-eval-after-load 'evil-collection
-  (with-eval-after-load 'dired
-    (evil-define-key 'normal dired-mode-map
-      "f" #'my/dired-create-file
-      "+" #'my/dired-create-folder
-      "/" #'dired-isearch-filenames   ;; built-in filename search
-      "s" #'my/dired-jump-to-file)))  ;; manual search command
+(with-eval-after-load 'dired
+  (evil-define-key 'normal dired-mode-map
+    "f" #'my/dired-create-file
+    "+" #'my/dired-create-folder
+    "/" #'dired-isearch-filenames
+    "s" #'my/dired-jump-to-file))
 
 (provide 'dired-config)
 ;;; dired-config.el ends here
