@@ -1,8 +1,9 @@
-;;; dired-config.el --- Clean, modern Dired (Emacs-native) -*- lexical-binding: t; -*-
+;;; dired-config.el --- Clean, simple file-manager Dired -*- lexical-binding: t; -*-
 
 ;;; Commentary:
-;; Stable, Evil-free Dired configuration.
-;; Optimized for macOS and keyboard-driven navigation.
+;; Emacs-native Dired configured to behave like a real file manager.
+;; Same-buffer navigation, Backspace to go up, minimal keybindings.
+;; Optimized for macOS and keyboard-driven workflows.
 
 ;;; Code:
 
@@ -17,7 +18,7 @@
   :commands (dired dired-jump)
   :bind (("C-x C-j" . dired-jump))
   :custom
-  ;; Prefer GNU ls on macOS (for colors, grouping)
+  ;; Prefer GNU ls on macOS (brew install coreutils)
   (insert-directory-program
    (or (executable-find "gls") insert-directory-program))
 
@@ -27,21 +28,35 @@
   ;; Move files to trash instead of deleting
   (delete-by-moving-to-trash t)
 
+  ;; Reuse buffers, no Dired buffer explosion
+  (dired-kill-when-opening-new-dired-buffer t)
+
   :hook
   ((dired-mode . dired-hide-details-mode)
-   (dired-mode . hl-line-mode)))
+   (dired-mode . hl-line-mode)
+   (dired-mode . auto-revert-mode)))
 
 ;; ============================================================
-;; Quality-of-life navigation
+;; File-manager style navigation
 ;; ============================================================
 
 (with-eval-after-load 'dired
-  ;; Reuse buffer when entering directories
+  ;; Allow same-buffer navigation
   (put 'dired-find-alternate-file 'disabled nil)
 
+  ;; Enter directory / open file
   (define-key dired-mode-map (kbd "RET") #'dired-find-alternate-file)
+
+  ;; Go up directory (Finder-style)
+  ;; macOS Backspace == DEL
+  (define-key dired-mode-map (kbd "DEL") #'dired-up-directory)
   (define-key dired-mode-map (kbd "^")   #'dired-up-directory)
-  (define-key dired-mode-map (kbd "b")   #'dired-jump))
+
+  ;; Jump to directory of current buffer
+  (define-key dired-mode-map (kbd "b")   #'dired-jump)
+
+  ;; Refresh
+  (define-key dired-mode-map (kbd "g")   #'revert-buffer))
 
 ;; ============================================================
 ;; Dotfiles toggle
@@ -54,7 +69,7 @@
               ("H" . dired-hide-dotfiles-mode)))
 
 ;; ============================================================
-;; Icons (optional but nice)
+;; Icons (optional, cosmetic)
 ;; ============================================================
 
 (use-package all-the-icons-dired
@@ -90,6 +105,7 @@
         (user-error "File already exists: %s" name)
       (write-region "" nil path)
       (revert-buffer)
+      (dired-goto-file path)
       (message "Created file: %s" name))))
 
 (defun my/dired-create-directory ()
@@ -102,6 +118,7 @@
         (user-error "Directory already exists: %s" name)
       (make-directory path t)
       (revert-buffer)
+      (dired-goto-file path)
       (message "Created directory: %s" name))))
 
 ;; ============================================================
@@ -111,10 +128,23 @@
 (defun my/dired-search ()
   "Search for a filename substring in the current Dired buffer."
   (interactive)
-  (call-interactively #'dired-isearch-filenames))
+  (dired-isearch-filenames))
 
 ;; ============================================================
-;; Custom keybindings (Emacs-native)
+;; VTERM INTEGRATION (CORRECT)
+;; ============================================================
+
+(defun my/dired-open-vterm-here ()
+  "Open a NEW vterm in the current Dired directory."
+  (interactive)
+  (let ((default-directory (dired-current-directory)))
+    (vterm (generate-new-buffer-name "*vterm*"))))
+
+(with-eval-after-load 'dired
+  (define-key dired-mode-map (kbd "C-c t") #'my/dired-open-vterm-here))
+
+;; ============================================================
+;; Custom keybindings
 ;; ============================================================
 
 (with-eval-after-load 'dired

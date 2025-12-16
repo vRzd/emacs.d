@@ -1,5 +1,13 @@
 ;;; org-config.el --- Org mode configuration -*- lexical-binding: t; -*-
 
+;;; Commentary:
+;; Readable Org with org-indent-mode enabled, but without ugly mouse selection.
+;; Includes agenda/capture/refile/tags/habits/babel + sane editing defaults.
+
+;;; Code:
+
+(require 'org)
+
 ;; ============================================================
 ;; BASIC ORG SETTINGS
 ;; ============================================================
@@ -9,10 +17,40 @@
       org-log-reschedule 'time
       org-log-done nil
       org-log-into-drawer nil
-      org-use-fast-todo-selection 'expert)
+      org-log-state-notes-into-drawer nil
+      org-use-fast-todo-selection 'expert
+
+      ;; nicer editing defaults
+      org-return-follows-link t
+      org-hide-emphasis-markers t
+      org-pretty-entities t
+      org-ellipsis " ▾"
+      org-image-actual-width '(300)
+      org-fontify-quote-and-verse-blocks t
+      org-fontify-whole-heading-line t
+      org-fontify-done-headline t)
 
 (global-set-key (kbd "C-c a") #'org-agenda)
 (global-set-key (kbd "<f6>")  #'org-capture)
+
+;; ============================================================
+;; INDENTATION (READABILITY) + FIX MOUSE SELECTION LOOK
+;; ============================================================
+;; Keep org-indent-mode (virtual indentation) but make selection behave nicer.
+
+(setq org-startup-indented t) ;; enables org-indent-mode on open
+
+(defun my/org-visual-selection ()
+  "Make selection feel normal even with org-indent-mode."
+  ;; This makes selection operate on *visual lines* (what you see),
+  ;; which avoids the ugly virtual-indent highlight effect.
+  (setq-local line-move-visual t)
+  (setq-local truncate-lines nil))
+
+(add-hook 'org-mode-hook #'my/org-visual-selection)
+
+;; Optional: don’t auto-copy on mouse drag (can feel less annoying)
+(setq mouse-drag-copy-region nil)
 
 ;; ============================================================
 ;; ORG AGENDA
@@ -65,7 +103,7 @@
     (kbd "C-c C-x .") #'org-time-stamp))
 
 ;; ============================================================
-;; AUTOSAVE — ORG ONLY (clean & explicit)
+;; AUTOSAVE — ORG ONLY
 ;; ============================================================
 
 (defun my/org-enable-autosave ()
@@ -114,7 +152,8 @@
    (shell . t)))
 
 (setq org-src-fontify-natively t
-      org-src-tab-acts-natively t)
+      org-src-tab-acts-natively t
+      org-edit-src-content-indentation 0)
 
 ;; ============================================================
 ;; TAB — toggle ONLY current heading (no jumping)
@@ -142,5 +181,8 @@
   (evil-define-key 'normal org-mode-map
     (kbd "<tab>") #'my/org-tab-toggle))
 
+(setq mouse-drag-copy-region nil)   ;; don’t auto-copy
+(setq select-active-regions t)
+
 (provide 'org-config)
-;;; org-mode-config.el ends here
+;;; org-config.el ends here

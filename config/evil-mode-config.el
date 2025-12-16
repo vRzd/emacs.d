@@ -85,5 +85,12 @@
       (kbd "RET") #'org-open-at-point
       (kbd "TAB") #'org-cycle)))
 
+(defun my/disable-eldoc-in-minibuffer ()
+  (eldoc-mode -1))
+
+(add-hook 'minibuffer-setup-hook #'my/disable-eldoc-in-minibuffer)
+
+(setq undo-tree-visualizer-diff nil)
+
 (provide 'evil-mode-config)
 ;;; evil-mode-config.el ends here
