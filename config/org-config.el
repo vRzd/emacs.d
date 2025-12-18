@@ -183,6 +183,7 @@
 
 (setq mouse-drag-copy-region nil)   ;; don’t auto-copy
 (setq select-active-regions t)
+(setq org-use-sub-superscripts nil)
 
 (provide 'org-config)
 ;;; org-config.el ends here
