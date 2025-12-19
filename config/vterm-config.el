@@ -1,4 +1,4 @@
-;;; vterm-config.el --- Vterm config -*- lexical-binding: t; -*-
+;;; vterm-config.el --- SAFE vterm configuration -*- lexical-binding: t; -*-
 
 ;;; Code:
 
@@ -6,71 +6,86 @@
   :ensure t
   :commands vterm
   :init
-  ;; Big scrollback
   (setq vterm-max-scrollback 100000)
 
-  ;; Shell selection
-  (cond
-   ((eq system-type 'darwin)
-    (setq vterm-shell "/bin/zsh")
-    ;; Make it behave like your normal login shell (loads ~/.zprofile then ~/.zshrc)
-    (setq vterm-shell-args '("--login")))
-   ((eq system-type 'windows-nt)
-    ;; Only if you actually use vterm on Windows (often it won't work without MSYS2/WSL)
-    (setq vterm-shell "powershell.exe")))
+  (when (eq system-type 'darwin)
+    (setq vterm-shell "/bin/zsh"
+          vterm-shell-args '("--login")))
 
   :bind
   (:map vterm-mode-map
+        ;; Navigation
         ("M-<left>"  . vterm-send-M-b)
         ("M-<right>" . vterm-send-M-f)
-        ("<delete>"  . vterm-send-delete)
-        ("<kp-delete>" . vterm-send-delete)
-        ("S-<backspace>" . vterm-send-delete)
-        ;; Optional: make C-g send SIGINT (like a terminal)
-        ("C-g" . vterm-send-C-c)))
 
-(defun my/vterm-open-new ()
-  (interactive)
-  (vterm))
+        ;; Editing
+        ("C-a" . vterm-send-C-a)
+        ("C-e" . vterm-send-C-e)
+        ("C-k" . vterm-send-C-k)
+        ("C-u" . vterm-send-C-u)
+        ("C-d" . vterm-send-C-d)
 
-(global-set-key (kbd "C-c C-v C-t") #'my/vterm-open-new)
+        ;; Interrupt (SAFE)
+        ("C-g" . vterm-send-C-c)
 
-;; Toggle terminal (only if you really want it)
-(use-package vterm-toggle
-  :ensure t
-  :bind (("C-`" . vterm-toggle)))
+        ;; Paste
+        ("C-y" . vterm-yank)))
 
-;; If you use Evil, disable it in vterm safely
-(defun my/disable-evil-in-vterm ()
-  (when (featurep 'evil)
-    (evil-local-mode -1))
-  (when (bound-and-true-p evil-escape-mode)
-    (evil-escape-mode -1)))
+;; ------------------------------------------------------------
+;; REMOVE LINE HIGHLIGHT COMPLETELY
+;; ------------------------------------------------------------
+(defun my/vterm-disable-hl ()
+  (hl-line-mode -1)
+  (setq-local cursor-line-highlight nil)
+  (setq-local global-hl-line-mode nil))
 
-(add-hook 'vterm-mode-hook #'my/disable-evil-in-vterm)
+(add-hook 'vterm-mode-hook #'my/vterm-disable-hl)
+
+;; ------------------------------------------------------------
+;; CURSOR SHAPE
+;; ------------------------------------------------------------
+(add-hook 'vterm-mode-hook
+          (lambda ()
+            (setq-local cursor-type 'box)))
+
+(add-hook 'vterm-copy-mode-hook
+          (lambda ()
+            (setq-local cursor-type 'bar)))
+
+;; ------------------------------------------------------------
+;; EVIL — HARD OFF
+;; ------------------------------------------------------------
+(add-hook 'vterm-mode-hook
+          (lambda ()
+            (when (bound-and-true-p evil-local-mode)
+              (evil-local-mode -1))))
 
 (with-eval-after-load 'evil-collection
-  (setq evil-collection-mode-list (remove 'vterm evil-collection-mode-list)))
+  (setq evil-collection-mode-list
+        (remove 'vterm evil-collection-mode-list)))
 
-;; Cursor type for copy-mode (avoid global set-cursor-color)
-(defun my/vterm-set-cursor-for-mode ()
-  (setq-local cursor-type (if (bound-and-true-p vterm-copy-mode) 'bar 'box)))
+;; ------------------------------------------------------------
+;; SCROLL FIX
+;; ------------------------------------------------------------
+(add-hook 'vterm-mode-hook
+          (lambda ()
+            (setq-local scroll-margin 0
+                        scroll-conservatively 101
+                        mouse-wheel-progressive-speed nil)))
 
-(add-hook 'vterm-copy-mode-hook #'my/vterm-set-cursor-for-mode)
-(add-hook 'vterm-mode-hook #'my/vterm-set-cursor-for-mode)
+;; ------------------------------------------------------------
+;; ANSI COLORS (SSH / ls)
+;; ------------------------------------------------------------
+(with-eval-after-load 'vterm
+  (set-face-foreground 'vterm-color-blue  "#7aa2f7")
+  (set-face-foreground 'vterm-color-cyan  "#56b6c2")
+  (set-face-foreground 'vterm-color-green "#98c379")
+  (set-face-foreground 'vterm-color-red   "#e06c75")
+  (set-face-foreground 'vterm-color-white "#d8dee9"))
 
-;; If your mouse wheel feels weird in vterm, keep it normal
-(defun my/vterm-normal-mouse-scroll ()
-  (setq-local mouse-wheel-scroll-amount '(1 ((shift) . 1)))
-  (setq-local mouse-wheel-progressive-speed nil)
-  (setq-local mouse-wheel-follow-mouse t)
-  (setq-local scroll-margin 0)
-  (setq-local scroll-conservatively 101)
-  (setq-local scroll-step 1))
-
-(add-hook 'vterm-mode-hook #'my/vterm-normal-mouse-scroll)
-
-;; macOS env sync for GUI Emacs (good to keep)
+;; ------------------------------------------------------------
+;; macOS ENV
+;; ------------------------------------------------------------
 (use-package exec-path-from-shell
   :ensure t
   :config
