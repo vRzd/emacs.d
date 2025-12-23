@@ -87,7 +87,8 @@
 
 (require 'ui-config)
 (require 'evil-mode-config)
-(require 'dired-config)
+;;(require 'dired-config)
+(require 'dirvish-config)
 (require 'calendar-config)
 (require 'org-config)
 (require 'vterm-config)

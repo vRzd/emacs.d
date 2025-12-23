@@ -52,6 +52,15 @@
 ;; Optional: don’t auto-copy on mouse drag (can feel less annoying)
 (setq mouse-drag-copy-region nil)
 
+
+;;
+(use-package org-transclusion
+  :ensure t
+  :after org)
+
+(with-eval-after-load 'org
+  (require 'org-transclusion)
+  (add-hook 'org-mode-hook #'org-transclusion-mode))
 ;; ============================================================
 ;; ORG AGENDA
 ;; ============================================================
