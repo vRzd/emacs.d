@@ -1,142 +1,78 @@
-;;; dirvish-config.el --- Modern Dirvish (Emacs-native) -*- lexical-binding: t; -*-
-
-;;; Commentary:
-;; Dirvish configured as a *lightweight Dired enhancement*
-;; NOT a standalone file manager.
-;;
-;; Principles:
-;; - Dired semantics stay intact
-;; - Preview is transient, edit is explicit
-;; - No Evil inside Dirvish
-;; - No C-c pollution
-;; - Load-order safe (Emacs 31)
-
-;;; Code:
+;;; dirvish-config.el --- Dired + TRUE manual preview -*- lexical-binding: t; -*-
 
 (require 'dired)
-(require 'dirvish)
+(require 'dired-x)
 
 ;; ------------------------------------------------------------
-;; ENABLE DIRVISH (SAFE OVERRIDE)
-;; ------------------------------------------------------------
-
-(dirvish-override-dired-mode)
-
-;; ------------------------------------------------------------
-;; CORE BEHAVIOR — BEST PRACTICE
-;; ------------------------------------------------------------
-
-(setq dirvish-reuse-session t)          ;; reuse same buffer
-(setq dirvish-use-header-line t)        ;; show path + metadata
-(setq dirvish-use-mode-line nil)        ;; clean UI
-(setq dirvish-preview-max-size (* 10 1024 1024)) ;; 10MB limit
-(setq dirvish-preview-dispatchers
-      '(image video audio gif pdf archive))
-
-(add-hook 'dirvish-mode-hook #'auto-revert-mode)
-
-;; ------------------------------------------------------------
-;; ABSOLUTELY DISABLE EVIL IN DIRVISH
-;; ------------------------------------------------------------
-
-(defun my/dirvish-disable-evil ()
-  "Disable Evil locally in Dirvish buffers."
-  (when (bound-and-true-p evil-local-mode)
-    (evil-local-mode -1))
-  (when (bound-and-true-p evil-collection-mode)
-    (evil-collection-mode -1)))
-
-(add-hook 'dirvish-mode-hook #'my/dirvish-disable-evil)
-
-;; ------------------------------------------------------------
-;; KEYBINDINGS — STANDARD DIRED SEMANTICS
-;; ------------------------------------------------------------
-
-(with-eval-after-load 'dirvish
-  ;; Open / enter
-  (define-key dirvish-mode-map (kbd "RET") #'dired-find-file)
-
-  ;; Go up
-  (define-key dirvish-mode-map (kbd "^") #'dired-up-directory)
-  (define-key dirvish-mode-map (kbd "<backspace>") #'dired-up-directory)
-
-  ;; Preview (non-editing)
-  (define-key dirvish-mode-map (kbd "SPC") #'dirvish-preview-toggle)
-
-  ;; Quit window only
-  (define-key dirvish-mode-map (kbd "q") #'quit-window)
-
-  ;; Refresh
-  (define-key dirvish-mode-map (kbd "g") #'revert-buffer))
-
-;; ------------------------------------------------------------
-;; DIRED QUALITY OF LIFE
+;; DIRED BASE
 ;; ------------------------------------------------------------
 
 (setq dired-listing-switches "-alh --group-directories-first")
+(setq dired-isearch-filenames 'dwim)
 (setq delete-by-moving-to-trash t)
-(setq dired-kill-when-opening-new-dired-buffer t)
-(setq dired-isearch-filenames 'dwim) ;; ignore case, smart
+
+(setq dired-omit-files
+      (concat dired-omit-files "\\|^\\.\\.?$"))
+(add-hook 'dired-mode-hook #'dired-omit-mode)
+
+(define-key dired-mode-map (kbd "<backspace>") #'dired-up-directory)
+(define-key dired-mode-map (kbd "DEL") #'dired-up-directory)
 
 ;; ------------------------------------------------------------
-;; HIDE . AND .. (LOAD-ORDER SAFE)
+;; SORT PROMPT
 ;; ------------------------------------------------------------
 
-(with-eval-after-load 'dired-x
-  (setq dired-omit-files
-        (concat dired-omit-files "\\|^\\.\\.?$")))
-
-(add-hook 'dirvish-mode-hook #'dired-omit-mode)
-
-;; ------------------------------------------------------------
-;; TOGGLE PARENT COLUMN (p)
-;; ------------------------------------------------------------
-
-(defun my/dirvish-toggle-parent ()
-  "Toggle Dirvish parent directory column."
+(defun my/dired-sort-prompt ()
   (interactive)
-  (if (memq 'parent dirvish-attributes)
-      (setq dirvish-attributes (remove 'parent dirvish-attributes))
-    (add-to-list 'dirvish-attributes 'parent))
-  (dirvish-revert))
+  (pcase
+      (read-char-choice
+       "Sort by: [n]ame [e]xt [d]ate [s]ize: "
+       '(?n ?e ?d ?s))
+    (?n (dired-sort-other "-alh --group-directories-first"))
+    (?e (dired-sort-other "-alh --group-directories-first -X"))
+    (?d (dired-sort-other "-alh --group-directories-first -t"))
+    (?s (dired-sort-other "-alh --group-directories-first -S"))))
 
-(with-eval-after-load 'dirvish
-  (define-key dirvish-mode-map (kbd "p") #'my/dirvish-toggle-parent))
-
-;; ------------------------------------------------------------
-;; FIX CURSOR ARTIFACT (block cursor at column 1)
-;; ------------------------------------------------------------
-
-(defun my/dirvish-cursor-fix ()
-  "Use thin cursor to avoid block artifact."
-  (setq-local cursor-type 'bar)
-  (setq-local cursor-in-non-selected-windows nil))
-
-(add-hook 'dirvish-mode-hook #'my/dirvish-cursor-fix)
+(define-key dired-mode-map (kbd "s") #'my/dired-sort-prompt)
 
 ;; ------------------------------------------------------------
-;; VTERM FROM DIRVISH (NO C-c ABUSE)
+;; MANUAL PREVIEW (NO DIRVISH OVERRIDE)
 ;; ------------------------------------------------------------
 
-(defun my/dirvish-open-vterm ()
-  "Open vterm in current Dirvish directory."
+(when (require 'dirvish nil t)
+
+  ;; Preview-safe types only
+  (setq dirvish-preview-dispatchers '(image gif pdf archive))
+  (setq dirvish-preview-max-size (* 10 1024 1024))
+
+  ;; REAL manual preview command
+  (defun my/dired-preview ()
+    "Preview file at point in another window without auto preview."
+    (interactive)
+    (let ((file (dired-get-file-for-visit)))
+      (display-buffer
+       (find-file-noselect file)
+       '((display-buffer-reuse-window
+          display-buffer-in-side-window)
+         (side . right)
+         (window-width . 0.45)))))
+
+  ;; SPACE = preview
+  (define-key dired-mode-map (kbd "SPC") #'my/dired-preview))
+
+;; ------------------------------------------------------------
+;; ENTRY
+;; ------------------------------------------------------------
+
+(defun my/dired-home ()
   (interactive)
-  (let ((default-directory (dirvish-current-directory)))
-    (vterm)))
+  (dired "~"))
 
-(with-eval-after-load 'dirvish
-  (define-key dirvish-mode-map (kbd "V") #'my/dirvish-open-vterm))
+(global-set-key (kbd "C-x d") #'my/dired-home)
 
-;; ------------------------------------------------------------
-;; ENTRY POINT
-;; ------------------------------------------------------------
+(define-key dired-mode-map (kbd "/") #'dired-goto-file)
 
-(defun my/dirvish-home ()
-  "Open Dirvish in home directory."
-  (interactive)
-  (dirvish "~"))
-
-(global-set-key (kbd "C-x d") #'my/dirvish-home)
+(setq dired-clean-confirm-killing-deleted-buffers nil)
 
 (provide 'dirvish-config)
 ;;; dirvish-config.el ends here
